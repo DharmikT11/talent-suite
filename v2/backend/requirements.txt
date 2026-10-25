@@ -11,4 +11,5 @@ requests>=2.32.0
 pandas>=2.0.0
 tabulate>=0.10.0
 ddgs>=9.0.0
+duckduckgo-search>=6.0.0
 beautifulsoup4>=4.12.0

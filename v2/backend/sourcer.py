@@ -12,8 +12,13 @@ import logging
 import re
 import time
 import urllib.parse
-from typing import Dict, Any, List, Optional
-from ddgs import DDGS
+try:
+    from ddgs import DDGS
+except ImportError:
+    try:
+        from duckduckgo_search import DDGS
+    except ImportError:
+        DDGS = None
 from extractor import _call_llm
 from query_builder import generate_sourcing_queries, is_valid_candidate_url, get_title_synonyms
 
