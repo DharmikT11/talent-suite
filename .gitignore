@@ -1,0 +1,16 @@
+.venv/
+node_modules/
+**/node_modules/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.zip
+cloudflared.exe
+hf_deploy/
+setup_hf.py
+.tempmediaStorage/
+.DS_Store
+Thumbs.db

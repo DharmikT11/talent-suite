@@ -1,0 +1,64 @@
+{
+  "name:anand rajendran": {
+    "name": "Anand Rajendran",
+    "email": "",
+    "headline": "Immediate Joiner - AI Engineer - Full-Stack",
+    "location": "Chennai",
+    "fit_score": 84,
+    "match_tier": "Strong Match",
+    "status": "Outreach Sent",
+    "profile_url": "https://in.linkedin.com/in/anand4585",
+    "matched_skills": [
+      "AI"
+    ],
+    "role_title": "AI Developer",
+    "cv_link": "https://in.linkedin.com/in/anand4585",
+    "source": "LinkedIn Sourcing (X-Ray)",
+    "added_at": "2026-10-23 21:43",
+    "updated_at": "2026-10-23 21:44",
+    "last_channel": "LinkedIn",
+    "contacted_at": "2026-10-23 21:44"
+  },
+  "name:satishreddy bathula": {
+    "name": "SatishReddy Bathula",
+    "email": "",
+    "headline": "Actively Looking Gen AI Developer",
+    "location": "Hyderabad",
+    "fit_score": 84,
+    "match_tier": "Strong Match",
+    "status": "Outreach Sent",
+    "profile_url": "https://www.linkedin.com/in/satishreddy-bathula-a62198182",
+    "matched_skills": [
+      "Machine Learning"
+    ],
+    "role_title": "AI Developer",
+    "cv_link": "https://www.linkedin.com/in/satishreddy-bathula-a62198182",
+    "source": "LinkedIn Sourcing (X-Ray)",
+    "added_at": "2026-10-23 22:34",
+    "updated_at": "2026-10-23 22:36",
+    "last_channel": "LinkedIn",
+    "contacted_at": "2026-10-23 22:36"
+  },
+  "name:daniel vadranapu": {
+    "name": "Daniel Vadranapu",
+    "email": "",
+    "headline": "Actively Looking for Opportunities - AI",
+    "location": "India",
+    "fit_score": 98,
+    "match_tier": "Strong Match",
+    "status": "Sourced",
+    "profile_url": "https://www.linkedin.com/in/daniel-vadranapu",
+    "matched_skills": [
+      "AI",
+      "Machine Learning",
+      "Deep Learning",
+      "NLP",
+      "Python"
+    ],
+    "role_title": "AI Developer",
+    "cv_link": "https://www.linkedin.com/in/daniel-vadranapu",
+    "source": "LinkedIn Sourcing (X-Ray)",
+    "added_at": "2026-10-23 23:01",
+    "updated_at": "2026-10-23 23:01"
+  }
+}
