@@ -251,6 +251,8 @@ export default function TalentSourcer({ onCandidateUpdated }) {
           core_skills: strat.core_skills || [],
           location: location || strat.location || 'India',
           max_results: 15,
+          job_title: strat.job_title || roleTitle || '',
+          experience: experience || strat.seniority || '1-3 Years',
         }),
       });
       const data = await res.json();
@@ -1119,6 +1121,24 @@ export default function TalentSourcer({ onCandidateUpdated }) {
                             {cand.source === 'LinkedIn' ? <FaLinkedin size={11} /> : cand.source === 'GitHub' ? <FaGithub size={11} /> : <FaGlobe size={10} />}
                             <span>{cand.source || 'Web Profile'}</span>
                           </span>
+
+                          {cand.experience && (
+                            <span style={{ 
+                              display: 'inline-flex', 
+                              alignItems: 'center', 
+                              gap: '4px', 
+                              padding: '1px 7px', 
+                              borderRadius: '4px', 
+                              fontSize: '0.72rem', 
+                              fontWeight: 700, 
+                              background: '#FEF3C7', 
+                              color: '#92400E', 
+                              border: '1px solid #FDE68A' 
+                            }}>
+                              <FaBriefcase size={10} />
+                              <span>{cand.experience}</span>
+                            </span>
+                          )}
 
                           {cand.is_active_seeker && (
                             <span style={{ 

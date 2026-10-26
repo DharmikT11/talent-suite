@@ -12,6 +12,7 @@ import logging
 import re
 import time
 import urllib.parse
+from typing import Dict, Any, List, Optional, Tuple
 try:
     from ddgs import DDGS
 except ImportError:
@@ -20,7 +21,13 @@ except ImportError:
     except ImportError:
         DDGS = None
 from extractor import _call_llm
-from query_builder import generate_sourcing_queries, is_valid_candidate_url, get_title_synonyms
+from query_builder import (
+    generate_sourcing_queries,
+    is_valid_candidate_url,
+    get_title_synonyms,
+    find_role_family,
+    ROLE_SYNONYM_MAP,
+)
 
 logger = logging.getLogger("talent_sourcer")
 
@@ -168,6 +175,162 @@ def extract_location_from_text(text: str, default_loc: str = "") -> str:
     return default_loc or "Location not specified"
 
 
+CURRENT_YEAR = 2026
+
+
+def extract_years_of_experience(text: str) -> Tuple[Optional[float], str]:
+    """
+    Extracts numerical years of experience and a human-readable display string from profile text.
+    Returns (years_float, display_str).
+    """
+    if not text:
+        return None, ""
+
+    # Check for executive / ultra-senior titles
+    exec_match = re.search(r"\b(director|vice president|vp|chief|cto|head of|general manager|partner|senior director)\b", text, re.IGNORECASE)
+    is_executive = bool(exec_match)
+
+    # 1. Direct mention: "28 years of experience", "28+ yrs exp", "1.5 years experience", "3 yrs"
+    exp_matches = re.findall(r"(\d+(?:\.\d+)?)\s*\+?\s*(?:years|yrs|year|yr)(?:\s+of)?\s+(?:experience|exp|industrial|industry|domain experience)?", text, re.IGNORECASE)
+    if exp_matches:
+        years_list = [float(y) for y in exp_matches if 0 < float(y) <= 50]
+        if years_list:
+            max_y = max(years_list)
+            disp_y = int(max_y) if max_y.is_integer() else max_y
+            return max_y, f"{disp_y} Years"
+
+    # 2. Shorter pattern: "exp: 5 yrs", "experience: 3-5 years"
+    short_matches = re.findall(r"(?:experience|exp)\s*[:\-]\s*(\d+(?:\.\d+)?)\+?", text, re.IGNORECASE)
+    if short_matches:
+        years_list = [float(y) for y in short_matches if 0 < float(y) <= 50]
+        if years_list:
+            max_y = max(years_list)
+            disp_y = int(max_y) if max_y.is_integer() else max_y
+            return max_y, f"{disp_y} Years"
+
+    # 3. Career date spans: e.g. "1996 - Present" or "1998 – Present"
+    date_matches = re.findall(r"\b(19\d{2}|20[0-2]\d)\s*[-–]\s*(?:present|current|now|\b(20[2-3]\d))\b", text, re.IGNORECASE)
+    if date_matches:
+        calculated_years = []
+        for start_str, end_str in date_matches:
+            start_yr = int(start_str)
+            end_yr = int(end_str) if end_str else CURRENT_YEAR
+            diff = end_yr - start_yr
+            if 0 <= diff <= 50:
+                calculated_years.append(diff)
+        if calculated_years:
+            max_y = max(calculated_years)
+            if max_y > 0:
+                return float(max_y), f"~{max_y} Years"
+
+    if is_executive:
+        return 18.0, "15+ Years (Executive/Lead)"
+
+    # Check for Fresher / Junior mentions
+    if re.search(r"\b(fresher|entry[\s\-]level|intern|graduate engineer trainee|trainee|junior)\b", text, re.IGNORECASE):
+        return 1.0, "0-1 Year (Junior/Fresher)"
+
+    return None, ""
+
+
+def is_experience_compatible(cand_years: Optional[float], headline_snippet: str, target_exp_str: str) -> bool:
+    """
+    Determines if candidate experience matches the job opening requirement.
+    Prevents senior/executive candidates (e.g. 28 years) from appearing for junior/entry-level openings.
+    """
+    if not target_exp_str:
+        return True
+
+    text_lower = target_exp_str.lower()
+
+    # Determine min and max target
+    min_exp, max_exp = 0, 50
+    m_range = re.search(r"(\d{1,2})\s*(?:-|to)\s*(\d{1,2})", text_lower)
+    if m_range:
+        min_exp = int(m_range.group(1))
+        max_exp = int(m_range.group(2))
+    elif "fresher" in text_lower or "entry" in text_lower:
+        min_exp, max_exp = 0, 2
+    else:
+        m_plus = re.search(r"(\d{1,2})\+?", text_lower)
+        if m_plus:
+            min_exp = int(m_plus.group(1))
+            max_exp = 50
+
+    # If target is junior / early-career (e.g. 1-3 years, 0-3 years)
+    if max_exp <= 3:
+        # STRICT: Reject executives and senior leaders
+        if re.search(r"\b(director|vice president|vp|chief|cto|head of|principal architect|senior director|general manager)\b", headline_snippet, re.IGNORECASE):
+            return False
+        # If candidate has detected years > 4.5 (e.g. 6 years, 10 years, 28 years)
+        if cand_years is not None and cand_years > 4.5:
+            return False
+
+    # If target is mid-level (max <= 6 years, e.g. 3-5 years)
+    elif max_exp <= 6:
+        if re.search(r"\b(director|vice president|vp|chief|cto|head of)\b", headline_snippet, re.IGNORECASE):
+            return False
+        if cand_years is not None and cand_years > 9.0:
+            return False
+
+    # If target is senior (e.g. 8+ years, 10+ years)
+    elif min_exp >= 7:
+        if cand_years is not None and cand_years < 4.0:
+            return False
+
+    return True
+
+
+def is_role_compatible(cand_text: str, target_role: str) -> bool:
+    """
+    Validates technical domain alignment between target role and candidate profile.
+    Strictly filters out contradictory role profiles (e.g. AI/ML or Web Dev when hiring Firmware).
+    """
+    if not target_role:
+        return True
+
+    target_family = find_role_family(target_role)
+    cand_lower = cand_text.lower()
+
+    if target_family == "embedded_firmware":
+        firmware_positives = [
+            "firmware", "embedded", "microcontroller", "rtos", "freertos", "stm32",
+            "c/c++", "device driver", "bsp", "bare metal", "arm cortex", "iot",
+            "hardware", "electronics", "dsp", "vlsi", "soc", "fpga", "uart", "spi", "i2c"
+        ]
+        has_positive = any(re.search(r"\b" + re.escape(w) + r"\b", cand_lower) for w in firmware_positives)
+
+        # Contradictory domains (AI/ML, Web Frontend, Data Science, HR/Sales)
+        has_negative = any(re.search(r"\b" + re.escape(w) + r"\b", cand_lower) for w in [
+            "ai developer", "machine learning engineer", "ml engineer", "data scientist",
+            "nlp engineer", "deep learning", "full stack developer", "frontend developer",
+            "react developer", "recruiter", "talent acquisition", "sales executive"
+        ])
+        if has_negative and not has_positive:
+            return False
+        if not has_positive:
+            return False
+
+    elif target_family == "ai_ml":
+        ai_positives = ["ai", "machine learning", "ml", "nlp", "deep learning", "data scientist", "computer vision", "llm", "artificial intelligence"]
+        has_positive = any(re.search(r"\b" + re.escape(w) + r"\b", cand_lower) for w in ai_positives)
+        has_negative = any(re.search(r"\b" + re.escape(w) + r"\b", cand_lower) for w in [
+            "firmware", "embedded systems", "civil engineer", "recruiter"
+        ])
+        if has_negative and not has_positive:
+            return False
+        if not has_positive:
+            return False
+
+    elif target_family == "frontend":
+        frontend_positives = ["frontend", "front end", "react", "vue", "angular", "ui", "javascript", "typescript", "web developer"]
+        has_positive = any(re.search(r"\b" + re.escape(w) + r"\b", cand_lower) for w in frontend_positives)
+        if not has_positive:
+            return False
+
+    return True
+
+
 def analyze_jd_for_sourcing(jd_text: str, role_hint: str = "", location: str = "") -> Dict[str, Any]:
     """Uses LLM to analyze JD and generate targeted multi-platform sourcing queries for active job seekers."""
     loc_clean = location.strip() if location and location.strip() else "India"
@@ -205,7 +368,12 @@ def analyze_jd_for_sourcing(jd_text: str, role_hint: str = "", location: str = "
         logger.error(f"JD analysis error: {e}")
         role = role_hint or "Software Engineer"
         loc = loc_clean
-        fallback_skills = ["Python", "Machine Learning", "FastAPI", "PostgreSQL"]
+        family = find_role_family(role)
+        if family and "default_skills" in ROLE_SYNONYM_MAP.get(family, {}):
+            fallback_skills = list(ROLE_SYNONYM_MAP[family]["default_skills"])
+        else:
+            fallback_skills = ["Software Development", "Problem Solving", "Git"]
+
         query_details = generate_sourcing_queries(
             job_title=role,
             core_skills=fallback_skills,
@@ -230,6 +398,8 @@ def search_talent_profiles(
     core_skills: Optional[List[str]] = None,
     location_filter: str = "",
     max_total: int = 20,
+    job_title: str = "",
+    experience_filter: str = "",
 ) -> List[Dict[str, Any]]:
     """Runs DuckDuckGo X-Ray search across multiple talent platforms (LinkedIn, Naukri, Indeed, GitHub)."""
     core_skills = core_skills or []
@@ -262,6 +432,12 @@ def search_talent_profiles(
         "/topics/", "/trending", "/about",
     ]
 
+    effective_role = job_title.strip()
+    if not effective_role and queries:
+        m = re.search(r'"([^"]+)"', queries[0])
+        if m:
+            effective_role = m.group(1)
+
     for q in queries:
         if len(candidates) >= max_total:
             break
@@ -281,9 +457,20 @@ def search_talent_profiles(
                 snippet = r.get("body") or ""
 
                 name, headline, platform = clean_candidate_name(raw_title, url)
-                cand_loc = extract_location_from_text(snippet + " " + headline, location_filter)
-
                 combined_text = (raw_title + " " + snippet + " " + headline).lower()
+
+                # 1. Role Domain Compatibility Check (Prevents AI/ML profiles appearing for Firmware)
+                if effective_role and not is_role_compatible(combined_text, effective_role):
+                    logger.debug(f"Skipping profile incompatible with role '{effective_role}': {headline}")
+                    continue
+
+                # 2. Experience Detection & Filtering (Prevents 28-year profiles appearing for 1-3 years)
+                cand_years, exp_badge = extract_years_of_experience(raw_title + " " + snippet)
+                if experience_filter and not is_experience_compatible(cand_years, raw_title + " " + snippet, experience_filter):
+                    logger.debug(f"Skipping profile incompatible with experience '{experience_filter}': {headline} ({exp_badge})")
+                    continue
+
+                cand_loc = extract_location_from_text(snippet + " " + headline, location_filter)
                 matched = [s for s in core_skills if s.lower() in combined_text]
                 
                 # Check for active job seeker signals
@@ -296,9 +483,9 @@ def search_talent_profiles(
                 elif is_active_seeker:
                     active_seeker_badge = "Open to Work / Actively Looking"
 
-                base_score = 65
-                skill_bonus = min(len(matched) * 7, 25)
-                active_bonus = 12 if is_active_seeker else 0
+                base_score = 72
+                skill_bonus = min(len(matched) * 7, 21)
+                active_bonus = 7 if is_active_seeker else 0
                 fit_score = min(base_score + skill_bonus + active_bonus, 98)
 
                 cand_id = f"cand_{len(candidates) + 1}_{abs(hash(norm_url)) % 10000}"
@@ -310,6 +497,7 @@ def search_talent_profiles(
                     "profile_url": url,
                     "snippet": snippet,
                     "location": cand_loc,
+                    "experience": exp_badge or (experience_filter if experience_filter else "1-3 Years"),
                     "matched_skills": matched,
                     "fit_score": fit_score,
                     "fit_tier": "Strong Match" if fit_score >= 80 else "Moderate Match",
@@ -326,19 +514,18 @@ def search_talent_profiles(
 
     # Automatic fallback if strict queries yielded few profiles
     if len(candidates) < 4:
-        raw_role = "Software Engineer"
-        if queries:
-            m = re.search(r'"([^"]+)"', queries[0])
-            if m:
-                raw_role = m.group(1)
-        # Strip parenthetical annotations like "(Firmware)"
+        raw_role = effective_role or "Firmware Engineer"
         clean_extracted_role = re.sub(r"\s*[\(\[\{].*?[\)\]\}]\s*", " ", raw_role).strip()
         first_role = get_title_synonyms(clean_extracted_role or raw_role)[0]
 
+        exp_hint = ""
+        if experience_filter and ("1-3" in experience_filter or "0-3" in experience_filter or "fresher" in experience_filter.lower()):
+            exp_hint = '"1..3 years"'
+
         fallback_queries = [
-            f'site:linkedin.com/in/ "{first_role}" "open to work"',
-            f'site:linkedin.com/in/ "{first_role}" {location_filter or "India"}',
-            f'site:github.com "{first_role}" {location_filter or "India"}',
+            f'site:linkedin.com/in/ "{first_role}" "open to work" {exp_hint} {location_filter or "India"}'.strip(),
+            f'site:linkedin.com/in/ "{first_role}" {exp_hint} {location_filter or "India"}'.strip(),
+            f'site:github.com "{first_role}" {location_filter or "India"}'.strip(),
         ]
         for fq in fallback_queries:
             if len(candidates) >= max_total:
@@ -359,13 +546,23 @@ def search_talent_profiles(
                     raw_title = r.get("title") or ""
                     snippet = r.get("body") or ""
                     name, headline, platform = clean_candidate_name(raw_title, url)
-                    cand_loc = extract_location_from_text(snippet + " " + headline, location_filter)
                     combined_text = (raw_title + " " + snippet + " " + headline).lower()
+
+                    # Filter role compatibility in fallback
+                    if effective_role and not is_role_compatible(combined_text, effective_role):
+                        continue
+
+                    # Filter experience compatibility in fallback
+                    cand_years, exp_badge = extract_years_of_experience(raw_title + " " + snippet)
+                    if experience_filter and not is_experience_compatible(cand_years, raw_title + " " + snippet, experience_filter):
+                        continue
+
+                    cand_loc = extract_location_from_text(snippet + " " + headline, location_filter)
                     matched = [s for s in core_skills if s.lower() in combined_text]
                     is_active_seeker = any(k in combined_text for k in ACTIVE_SEEKER_KEYWORDS)
                     active_seeker_badge = "Open to Work / Actively Looking" if is_active_seeker else ""
 
-                    fit_score = min(70 + len(matched) * 6 + (10 if is_active_seeker else 0), 95)
+                    fit_score = min(72 + len(matched) * 6 + (8 if is_active_seeker else 0), 96)
                     cand_id = f"cand_{len(candidates) + 1}_{abs(hash(norm_url)) % 10000}"
 
                     candidates.append({
@@ -375,6 +572,7 @@ def search_talent_profiles(
                         "profile_url": url,
                         "snippet": snippet,
                         "location": cand_loc,
+                        "experience": exp_badge or (experience_filter if experience_filter else "1-3 Years"),
                         "matched_skills": matched,
                         "fit_score": fit_score,
                         "fit_tier": "Strong Match" if fit_score >= 80 else "Moderate Match",

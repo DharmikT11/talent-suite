@@ -253,13 +253,15 @@ def parse_experience_band(seniority_or_exp: str) -> Optional[str]:
 
     text = seniority_or_exp.lower()
 
-    # Match range e.g. "3-5", "3 to 5", "3 - 5 years"
+    # Match range e.g. "3-5", "3 to 5", "3 - 5 years", "1-3 years", "0-3 years"
     range_match = re.search(r"(\d{1,2})\s*(?:-|to)\s*(\d{1,2})\s*(?:years|yrs)?", text)
     if range_match:
         start = int(range_match.group(1))
         end = int(range_match.group(2))
-        if 0 < start <= end <= 20 and (end - start) <= 5:
-            years = [f'"{y} years"' for y in range(start, end + 1)]
+        if 0 <= start <= end <= 20 and (end - start) <= 5:
+            years = [f'"{y} years"' if y != 1 else f'"{y} year"' for y in range(max(1, start), end + 1)]
+            if start == 0 or "fresher" in text:
+                years.insert(0, '"fresher"')
             return f"({' OR '.join(years)})"
 
     # Match single plus e.g. "5+ years" or "5 years"

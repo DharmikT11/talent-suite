@@ -946,6 +946,8 @@ class SourcingSearchRequest(BaseModel):
     core_skills: Optional[List[str]] = []
     location: Optional[str] = ""
     max_results: Optional[int] = 15
+    job_title: Optional[str] = ""
+    experience: Optional[str] = ""
 
 
 class SourcingPitchRequest(BaseModel):
@@ -980,6 +982,8 @@ def search_sourcing_candidates(req: SourcingSearchRequest):
             core_skills=req.core_skills or [],
             location_filter=req.location or "",
             max_total=req.max_results or 15,
+            job_title=req.job_title or "",
+            experience_filter=req.experience or "",
         )
         return {"ok": True, "candidates": candidates, "total": len(candidates)}
     except Exception as exc:
