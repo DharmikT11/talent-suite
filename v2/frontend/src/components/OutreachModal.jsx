@@ -184,7 +184,7 @@ export default function OutreachModal({ candidate, roleTitle, jdSummary, onClose
         </div>
 
         {/* Channel Selection Tabs */}
-        <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '12px', marginBottom: '16px' }}>
+        <div className="modal-channel-tabs" style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '12px', marginBottom: '16px' }}>
           <button
             onClick={() => setActiveTab('linkedin')}
             style={{

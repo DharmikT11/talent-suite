@@ -161,7 +161,7 @@ export default function UploadZone({ onScreenComplete, isConnected, hasAiKey, on
           </div>
 
           {/* Stepper Indicator */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', fontWeight: '600' }}>
+          <div className="stepper-indicator-bar">
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: files.length > 0 ? '#10B981' : '#1D4ED8', background: files.length > 0 ? '#ECFDF5' : '#EFF6FF', padding: '6px 12px', borderRadius: '20px', border: files.length > 0 ? '1px solid #A7F3D0' : '1px solid #BFDBFE' }}>
               <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: files.length > 0 ? '#10B981' : '#1D4ED8', color: '#fff', fontSize: '0.7rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {files.length > 0 ? <Check size={11} strokeWidth={3} /> : '1'}

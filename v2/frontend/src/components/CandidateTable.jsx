@@ -42,8 +42,8 @@ export default function CandidateTable({ candidates = [], onOpenInterviewKit }) 
         )}
       </div>
 
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+      <div className="table-responsive-wrapper">
+        <table className="responsive-data-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--border-medium)', textAlign: 'left', color: 'var(--text-muted)' }}>
               <th style={{ padding: '12px 14px', fontWeight: '600' }}>Candidate</th>

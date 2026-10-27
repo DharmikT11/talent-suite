@@ -222,7 +222,7 @@ export default function EmailSettingsModal({ isOpen, onClose, onSaved }) {
           <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Select Active Email Provider
           </label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <div className="responsive-two-col-grid">
             {/* Brevo Card */}
             <div
               onClick={() => setProvider('brevo')}
@@ -340,7 +340,7 @@ export default function EmailSettingsModal({ isOpen, onClose, onSaved }) {
             </div>
 
             {/* Sender Email & Name in 2 columns */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="responsive-two-col-grid">
               <div className="form-group" style={{ margin: 0 }}>
                 <label className="form-label">
                   Sender Email (From) <span style={{ color: '#EF4444' }}>*</span>
@@ -388,7 +388,7 @@ export default function EmailSettingsModal({ isOpen, onClose, onSaved }) {
             </div>
 
             {/* SMTP Host and Port */}
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
+            <div className="responsive-two-col-grid">
               <div className="form-group" style={{ margin: 0 }}>
                 <label className="form-label">
                   SMTP Host Server <span style={{ color: '#EF4444' }}>*</span>
@@ -422,7 +422,7 @@ export default function EmailSettingsModal({ isOpen, onClose, onSaved }) {
             </div>
 
             {/* SMTP Username and Password */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="responsive-two-col-grid">
               <div className="form-group" style={{ margin: 0 }}>
                 <label className="form-label">
                   SMTP Username / Login
@@ -471,7 +471,7 @@ export default function EmailSettingsModal({ isOpen, onClose, onSaved }) {
             </div>
 
             {/* Sender Email & Name */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="responsive-two-col-grid">
               <div className="form-group" style={{ margin: 0 }}>
                 <label className="form-label">
                   Sender Email (From) <span style={{ color: '#EF4444' }}>*</span>

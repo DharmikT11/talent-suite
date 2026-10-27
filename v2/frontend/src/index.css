@@ -214,10 +214,21 @@ h1, h2, h3, h4, h5, h6 {
   gap: 8px;
   margin-bottom: 24px;
   border-bottom: 1px solid var(--border-subtle);
-  padding-bottom: 4px;
+  padding-bottom: 6px;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tabs-container::-webkit-scrollbar {
+  display: none;
 }
 
 .tab-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -470,7 +481,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Candidate Grid */
 .candidate-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
 }
 
@@ -851,4 +862,509 @@ h1, h2, h3, h4, h5, h6 {
   background: #EFF6FF;
   border-color: #3B82F6;
   border-style: solid;
+}
+
+/* ==========================================================================
+   Responsive Architecture & Multi-Device Utility Classes
+   ========================================================================== */
+
+/* Sourcing Portal Inputs Grid */
+.sourcer-inputs-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+/* Sourcing Form Action Buttons */
+.sourcer-action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Sourced Candidate Cards Grid */
+.sourced-candidate-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 16px;
+}
+
+/* Candidate Pipeline Header Bar */
+.pipeline-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pipeline-search-box {
+  width: 400px;
+  max-width: 100%;
+  margin-bottom: 0 !important;
+}
+
+/* Modal Two-Column Grid */
+.responsive-two-col-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* AI Engine Provider Grid */
+.provider-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+/* Table Responsive Horizontal Scroll Wrapper */
+.table-responsive-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius-md);
+  margin-top: 8px;
+}
+
+.responsive-data-table {
+  min-width: 720px;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Screening Stepper Indicator Bar */
+.stepper-indicator-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  flex-wrap: wrap;
+}
+
+/* Outreach Modal Channel Tabs */
+.modal-channel-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.modal-channel-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.modal-channel-tabs button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Comprehensive Media Queries for All Screen Sizes
+   ========================================================================== */
+
+/* Laptop / Medium Desktop (<= 1200px) */
+@media (max-width: 1200px) {
+  .app-container {
+    padding: 18px 24px 56px;
+  }
+
+  .navbar {
+    padding: 14px 20px;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .candidate-grid {
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 16px;
+  }
+
+  .sourced-candidate-grid {
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 14px;
+  }
+}
+
+/* Tablet Landscape / Small Laptop (<= 992px) */
+@media (max-width: 992px) {
+  .app-container {
+    padding: 16px 20px 48px;
+  }
+
+  .navbar {
+    padding: 14px 18px;
+  }
+
+  .nav-controls {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .sourcer-inputs-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .screen-layout {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+}
+
+/* Tablet Portrait / Phablets (<= 768px) */
+@media (max-width: 768px) {
+  .app-container {
+    padding: 14px 16px 40px;
+  }
+
+  .navbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .brand-section {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .brand-text h1 {
+    font-size: 1.15rem;
+  }
+
+  .nav-controls {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .nav-controls .sheet-status-pill,
+  .nav-controls .btn {
+    flex: 1 1 auto;
+    justify-content: center;
+    font-size: 0.78rem;
+    padding: 7px 11px;
+    text-align: center;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .metric-card {
+    padding: 14px 12px;
+    gap: 12px;
+  }
+
+  .metric-icon-box {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+  }
+
+  .metric-info .metric-label {
+    font-size: 0.72rem;
+  }
+
+  .metric-info .metric-value {
+    font-size: 1.25rem;
+  }
+
+  .tab-btn {
+    padding: 8px 14px;
+    font-size: 0.84rem;
+  }
+
+  .panel-card {
+    padding: 18px 16px;
+  }
+
+  .candidate-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+
+  .sourced-candidate-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .pipeline-header-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .pipeline-search-box {
+    width: 100% !important;
+  }
+
+  .pipeline-screen-btn {
+    width: 100% !important;
+    justify-content: center;
+  }
+
+  .sourcer-action-buttons {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .sourcer-action-buttons button {
+    width: 100% !important;
+    min-width: 0 !important;
+    justify-content: center;
+  }
+
+  .responsive-two-col-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+
+  .modal-overlay {
+    padding: 12px;
+  }
+
+  .modal-content {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    padding: 22px 16px !important;
+  }
+
+  .chat-window {
+    width: calc(100vw - 28px) !important;
+    right: 14px !important;
+    bottom: 84px !important;
+    height: calc(100vh - 100px) !important;
+    max-height: 560px !important;
+  }
+}
+
+/* Smartphone / Mobile Devices (<= 540px) */
+@media (max-width: 540px) {
+  .app-container {
+    padding: 10px 10px 32px;
+  }
+
+  .navbar {
+    padding: 12px 10px;
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
+  }
+
+  .brand-logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .brand-text h1 {
+    font-size: 1.05rem;
+  }
+
+  .brand-badge {
+    font-size: 0.6rem;
+    padding: 2px 5px;
+  }
+
+  .brand-text p {
+    font-size: 0.68rem;
+    line-height: 1.3;
+  }
+
+  .nav-controls {
+    gap: 5px;
+  }
+
+  .nav-controls .sheet-status-pill,
+  .nav-controls .btn {
+    font-size: 0.74rem;
+    padding: 6px 8px;
+    flex: 1 1 calc(50% - 6px);
+    min-width: 120px;
+  }
+
+  /* 2-Column Compact Metrics on Mobile */
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .metric-card {
+    padding: 10px 8px;
+    gap: 8px;
+    border-radius: var(--radius-md);
+  }
+
+  .metric-icon-box {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+  }
+
+  .metric-icon-box svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .metric-info .metric-label {
+    font-size: 0.66rem;
+    margin-bottom: 2px;
+    letter-spacing: 0.02em;
+  }
+
+  .metric-info .metric-value {
+    font-size: 1.05rem;
+  }
+
+  /* Tabs horizontal scroll on Mobile */
+  .tabs-container {
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .tab-btn {
+    padding: 7px 12px;
+    font-size: 0.78rem;
+    border-radius: 8px;
+  }
+
+  .tab-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  /* Candidate Grid 1 Column on Mobile */
+  .candidate-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .candidate-card {
+    padding: 16px 12px;
+    border-radius: var(--radius-md);
+  }
+
+  .candidate-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .candidate-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .candidate-actions .btn {
+    width: 100% !important;
+    justify-content: center;
+  }
+
+  .panel-card {
+    padding: 16px 12px;
+    border-radius: var(--radius-md);
+  }
+
+  .dropzone {
+    padding: 24px 12px;
+  }
+
+  .jd-textarea {
+    height: 180px;
+    font-size: 0.85rem;
+  }
+
+  /* Modals as bottom-sheet / full viewport on Mobile */
+  .modal-overlay {
+    padding: 8px;
+    align-items: flex-end;
+  }
+
+  .modal-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 18px 14px !important;
+    border-radius: 16px 16px 0 0 !important;
+    max-height: 94vh !important;
+  }
+
+  .provider-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  /* AI Floating Chat Drawer on Mobile */
+  .chat-drawer {
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .chat-bubble-btn {
+    width: 48px;
+    height: 48px;
+  }
+
+  .chat-window {
+    width: calc(100vw - 16px) !important;
+    right: 8px !important;
+    bottom: 68px !important;
+    height: calc(100vh - 84px) !important;
+    max-height: 540px !important;
+    border-radius: 14px !important;
+  }
+
+  .stepper-indicator-bar {
+    width: 100%;
+    margin-top: 6px;
+  }
+}
+
+/* Small Smartphone / Compact Mobile (<= 380px) */
+@media (max-width: 380px) {
+  .app-container {
+    padding: 8px 8px 28px;
+  }
+
+  .navbar {
+    padding: 10px 8px;
+  }
+
+  .nav-controls .sheet-status-pill,
+  .nav-controls .btn {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .tab-btn {
+    padding: 6px 10px;
+    font-size: 0.74rem;
+  }
 }

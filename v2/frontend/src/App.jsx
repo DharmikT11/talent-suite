@@ -177,8 +177,8 @@ export default function App() {
 
       {activeTab === 'directory' && (
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-            <div className="search-bar" style={{ width: '400px', marginBottom: 0 }}>
+          <div className="pipeline-header-bar">
+            <div className="search-bar pipeline-search-box">
               <Search size={18} style={{ color: 'var(--text-muted)' }} />
               <input 
                 type="text" 
@@ -189,7 +189,7 @@ export default function App() {
               />
             </div>
             <button 
-              className="btn btn-secondary"
+              className="btn btn-secondary pipeline-screen-btn"
               onClick={() => setActiveTab('screen')}
             >
               <UploadCloud size={16} />

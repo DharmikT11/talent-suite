@@ -533,7 +533,7 @@ export default function TalentSourcer({ onCandidateUpdated }) {
           </div>
 
           {/* 3 Main Visible Inputs */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr 1fr', gap: '16px', marginBottom: '18px' }}>
+          <div className="sourcer-inputs-grid">
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label">
                 Target Role Title *
@@ -656,7 +656,7 @@ export default function TalentSourcer({ onCandidateUpdated }) {
           )}
 
           {/* Action Buttons */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <div className="sourcer-action-buttons">
             <button
               type="button"
               className={selectedJobId === 'new' ? 'btn btn-primary' : 'btn btn-secondary'}
@@ -1066,7 +1066,7 @@ export default function TalentSourcer({ onCandidateUpdated }) {
             </button>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '16px' }}>
+          <div className="sourced-candidate-grid">
             {candidates.filter(c => {
               if (urgencyFilter === 'immediate') {
                 return (c.active_seeker_badge || '').includes('Immediate') || (c.active_seeker_badge || '').includes('Notice');

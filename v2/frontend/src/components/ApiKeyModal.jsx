@@ -68,7 +68,7 @@ export default function ApiKeyModal({ currentProvider, maskedKey, onClose, onKey
             <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '8px' }}>
               Select AI Engine
             </label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+            <div className="provider-grid">
               {[
                 { id: 'gemini', label: 'Google Gemini', sub: 'Fast & Free' },
                 { id: 'anthropic', label: 'Claude', sub: '3.5 Haiku' },
