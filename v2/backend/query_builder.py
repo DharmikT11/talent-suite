@@ -139,6 +139,69 @@ ROLE_SYNONYM_MAP: Dict[str, Dict[str, Any]] = {
         },
         "default_skills": ["C", "C++", "RTOS", "Embedded Linux", "Microcontrollers"],
     },
+    "mobile": {
+        "keywords": [
+            "mobile", "android", "ios", "flutter", "react native", "swift", "kotlin", "app developer"
+        ],
+        "synonyms": [
+            "Mobile Developer",
+            "Android Developer",
+            "iOS Developer",
+            "Flutter Developer",
+            "React Native Developer",
+        ],
+        "generic_skills": {
+            "mobile", "android", "ios", "app development"
+        },
+        "default_skills": ["Flutter", "React Native", "Android", "Kotlin", "Swift"],
+    },
+    "qa_testing": {
+        "keywords": [
+            "qa", "quality assurance", "test engineer", "automation tester", "sdet", "software testing", "selenium", "cypress"
+        ],
+        "synonyms": [
+            "QA Engineer",
+            "SDET",
+            "Automation Test Engineer",
+            "Quality Assurance Engineer",
+            "Software Test Engineer",
+        ],
+        "generic_skills": {
+            "qa", "testing", "test", "quality assurance"
+        },
+        "default_skills": ["Selenium", "Cypress", "Python", "Test Automation", "Jira"],
+    },
+    "cybersecurity": {
+        "keywords": [
+            "security", "cybersecurity", "infosec", "penetration tester", "soc analyst", "security engineer", "vapt"
+        ],
+        "synonyms": [
+            "Cybersecurity Engineer",
+            "Security Analyst",
+            "Information Security Engineer",
+            "SOC Analyst",
+            "Penetration Tester",
+        ],
+        "generic_skills": {
+            "security", "cybersecurity", "infosec"
+        },
+        "default_skills": ["Network Security", "SIEM", "Python", "VAPT", "Firewalls"],
+    },
+    "product": {
+        "keywords": [
+            "product manager", "technical product manager", "associate product manager", "product owner", "product lead"
+        ],
+        "synonyms": [
+            "Product Manager",
+            "Technical Product Manager",
+            "Associate Product Manager",
+            "Product Owner",
+        ],
+        "generic_skills": {
+            "product", "management", "roadmap"
+        },
+        "default_skills": ["Product Strategy", "Agile", "User Research", "Roadmapping"],
+    },
 }
 
 # Unified availability signals group
