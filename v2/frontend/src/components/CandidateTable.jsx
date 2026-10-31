@@ -52,7 +52,7 @@ export default function CandidateTable({ candidates = [], onOpenInterviewKit, on
               <th style={{ padding: '12px 14px', fontWeight: '600' }}>Core Skills</th>
               <th style={{ padding: '12px 14px', fontWeight: '600' }}>Location</th>
               <th style={{ padding: '12px 14px', fontWeight: '600' }}>Fit Score</th>
-              <th style={{ padding: '12px 14px', fontWeight: '600', textAlign: 'right' }}>Actions</th>
+              <th style={{ padding: '12px 14px', fontWeight: '600', textAlign: 'right', whiteSpace: 'nowrap' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -162,8 +162,8 @@ export default function CandidateTable({ candidates = [], onOpenInterviewKit, on
                         <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Unscored</span>
                       )}
                     </td>
-                    <td style={{ padding: '14px', textAlign: 'right' }}>
-                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <td style={{ padding: '14px', textAlign: 'right', whiteSpace: 'nowrap', width: '1%' }}>
+                      <div style={{ display: 'inline-flex', gap: '6px', justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
                         {/* Sourced Profile Button */}
                         {linkedInUrl && (
                           <a 
@@ -171,7 +171,7 @@ export default function CandidateTable({ candidates = [], onOpenInterviewKit, on
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="btn btn-secondary" 
-                            style={{ padding: '5px 8px', fontSize: '0.74rem', display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#0A66C2', background: '#EFF6FF', borderColor: '#BFDBFE' }}
+                            style={{ padding: '5px 8px', fontSize: '0.74rem', display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#0A66C2', background: '#EFF6FF', borderColor: '#BFDBFE', whiteSpace: 'nowrap', flexShrink: 0 }}
                             title="Open Profile in new tab"
                           >
                             {linkedInUrl.includes('github.com') ? <FaGithub size={11} style={{ color: '#24292e' }} /> : <FaLinkedin size={11} style={{ color: '#0A66C2' }} />}
@@ -187,7 +187,7 @@ export default function CandidateTable({ candidates = [], onOpenInterviewKit, on
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="btn btn-secondary" 
-                            style={{ padding: '5px 8px', fontSize: '0.74rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                            style={{ padding: '5px 8px', fontSize: '0.74rem', display: 'inline-flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}
                             title="View Uploaded Resume PDF"
                           >
                             <FileText size={11} />
@@ -201,7 +201,7 @@ export default function CandidateTable({ candidates = [], onOpenInterviewKit, on
                           <button 
                             type="button"
                             className="btn btn-secondary"
-                            style={{ padding: '5px 8px', fontSize: '0.74rem', display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#1D4ED8' }}
+                            style={{ padding: '5px 8px', fontSize: '0.74rem', display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#1D4ED8', whiteSpace: 'nowrap', flexShrink: 0 }}
                             onClick={() => onOpenOutreach(c)}
                             title="Generate AI Outreach Pitch"
                           >
@@ -214,7 +214,7 @@ export default function CandidateTable({ candidates = [], onOpenInterviewKit, on
                         <button 
                           type="button"
                           className="btn btn-outline" 
-                          style={{ padding: '5px 8px', fontSize: '0.74rem' }}
+                          style={{ padding: '5px 8px', fontSize: '0.74rem', display: 'inline-flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}
                           onClick={() => onOpenInterviewKit(c)}
                         >
                           <Sparkles size={11} />

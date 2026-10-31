@@ -238,7 +238,7 @@ export default function CandidateCard({ candidate, onOpenInterviewKit, onOpenOut
           <button
             type="button"
             className="btn btn-secondary"
-            style={{ padding: '8px 12px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#1D4ED8' }}
+            style={{ flex: 1, minWidth: '95px', padding: '8px 12px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px', color: '#1D4ED8', whiteSpace: 'nowrap' }}
             onClick={() => onOpenOutreach(candidate)}
             title="Generate AI Outreach Pitch (LinkedIn, Email, WhatsApp)"
           >
@@ -251,7 +251,7 @@ export default function CandidateCard({ candidate, onOpenInterviewKit, onOpenOut
         <button 
           type="button"
           className="btn btn-outline"
-          style={{ padding: '8px 12px', fontSize: '0.8rem' }}
+          style={{ flex: 1, minWidth: '95px', padding: '8px 12px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px', whiteSpace: 'nowrap' }}
           onClick={() => onOpenInterviewKit(candidate)}
           title="Generate AI Interview Questions"
         >
