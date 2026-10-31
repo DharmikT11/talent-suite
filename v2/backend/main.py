@@ -28,6 +28,7 @@ from sourcer import (
     analyze_jd_for_sourcing,
     search_talent_profiles,
     generate_outreach_pitch,
+    find_candidate_email,
 )
 from email_sender import (
     get_email_config,
@@ -1053,6 +1054,29 @@ def generate_sourcing_pitch(req: SourcingPitchRequest):
         return {"ok": True, "pitches": pitches}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Pitch generation error: {str(exc)}")
+
+
+class SourcingFindEmailRequest(BaseModel):
+    name: str
+    profile_url: Optional[str] = ""
+    headline: Optional[str] = ""
+    location: Optional[str] = ""
+
+
+@app.post("/api/sourcing/find-email")
+def find_candidate_email_endpoint(req: SourcingFindEmailRequest):
+    if not req.name and not req.profile_url:
+        raise HTTPException(status_code=400, detail="Name or profile URL is required.")
+    try:
+        result = find_candidate_email(
+            name=req.name or "",
+            profile_url=req.profile_url or "",
+            headline=req.headline or "",
+            location=req.location or "",
+        )
+        return result
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Email discovery error: {str(exc)}")
 
 
 class SourcingSaveCandidateRequest(BaseModel):

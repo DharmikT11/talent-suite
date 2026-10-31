@@ -65,6 +65,44 @@ export default function OutreachModal({ candidate, roleTitle, jdSummary, onClose
   };
 
   const [candidateEmail, setCandidateEmail] = useState(candidate?.email || '');
+  const [findingEmail, setFindingEmail] = useState(false);
+  const [findEmailMsg, setFindEmailMsg] = useState(null);
+  const [googleDorkUrl, setGoogleDorkUrl] = useState(null);
+
+  const handleAutoFindEmail = async () => {
+    setFindingEmail(true);
+    setFindEmailMsg(null);
+    setGoogleDorkUrl(null);
+    try {
+      const res = await fetch('/api/sourcing/find-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: candidate?.name || '',
+          profile_url: candidate?.profile_url || '',
+          headline: candidate?.headline || '',
+          location: candidate?.location || '',
+        }),
+      });
+      const data = await res.json();
+      if (data.ok && data.email) {
+        setCandidateEmail(data.email);
+        setFindEmailMsg({ type: 'success', text: `Found real email (${data.email}) via ${data.source || 'GitHub Commits'}!` });
+      } else {
+        const q = encodeURIComponent(`"${candidate?.name || ''}" ("@gmail.com" OR "@outlook.com") ${roleTitle || ''}`);
+        const gUrl = `https://www.google.com/search?q=${q}`;
+        setGoogleDorkUrl(gUrl);
+        setFindEmailMsg({
+          type: 'info',
+          text: 'No public commit email was found. You can check Google or use free ContactOut/Kaspr extension on LinkedIn.'
+        });
+      }
+    } catch (err) {
+      setFindEmailMsg({ type: 'error', text: 'Error querying email service: ' + err.message });
+    } finally {
+      setFindingEmail(false);
+    }
+  };
 
   const applyUrl = typeof window !== 'undefined' 
     ? `${window.location.origin}/apply?role=${encodeURIComponent(roleTitle || 'Firmware Engineer')}&name=${encodeURIComponent(candidate?.name || '')}`
@@ -434,17 +472,70 @@ export default function OutreachModal({ candidate, roleTitle, jdSummary, onClose
 
                 {/* Candidate Email Input & Dual Action Buttons */}
                 <div style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <div className="input-with-icon">
-                    <Mail className="input-icon" size={15} />
-                    <input
-                      type="email"
-                      className="form-input"
-                      style={{ fontSize: '0.84rem' }}
-                      placeholder="Candidate email address (e.g. rahul@example.com)"
-                      value={candidateEmail}
-                      onChange={(e) => setCandidateEmail(e.target.value)}
-                    />
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <div className="input-with-icon" style={{ flex: 1 }}>
+                      <Mail className="input-icon" size={15} />
+                      <input
+                        type="email"
+                        className="form-input"
+                        style={{ fontSize: '0.84rem' }}
+                        placeholder="Candidate email address (e.g. rahul@gmail.com)"
+                        value={candidateEmail}
+                        onChange={(e) => setCandidateEmail(e.target.value)}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      style={{ padding: '8px 12px', fontSize: '0.8rem', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                      onClick={handleAutoFindEmail}
+                      disabled={findingEmail}
+                      title="Extract developer email from public git commits or portfolio"
+                    >
+                      {findingEmail ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} style={{ color: 'var(--primary)' }} />}
+                      <span>{findingEmail ? 'Searching...' : '⚡ Find Email Free'}</span>
+                    </button>
                   </div>
+
+                  {findEmailMsg && (
+                    <div style={{
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      fontSize: '0.8rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '8px',
+                      background: findEmailMsg.type === 'success' ? '#DCFCE7' : findEmailMsg.type === 'error' ? '#FEE2E2' : '#F3F4F6',
+                      color: findEmailMsg.type === 'success' ? '#166534' : findEmailMsg.type === 'error' ? '#991B1B' : '#374151',
+                      border: `1px solid ${findEmailMsg.type === 'success' ? '#86EFAC' : findEmailMsg.type === 'error' ? '#FCA5A5' : '#E5E7EB'}`,
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {findEmailMsg.type === 'success' ? <CheckCircle2 size={14} /> : <AlertCircle size={14} />}
+                        <span>{findEmailMsg.text}</span>
+                      </div>
+                      {googleDorkUrl && (
+                        <a
+                          href={googleDorkUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            color: 'var(--primary)',
+                            fontWeight: 600,
+                            textDecoration: 'underline',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '3px',
+                            whiteSpace: 'nowrap',
+                            fontSize: '0.78rem',
+                          }}
+                        >
+                          <span>Search Google</span>
+                          <ExternalLink size={11} />
+                        </a>
+                      )}
+                    </div>
+                  )}
 
                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                     <button
@@ -479,6 +570,32 @@ export default function OutreachModal({ candidate, roleTitle, jdSummary, onClose
                           : 'Send via Brevo API'}
                       </span>
                     </button>
+                  </div>
+
+                  {/* Free Email Finding Strategies Tip Box */}
+                  <div style={{
+                    marginTop: '10px',
+                    padding: '10px 12px',
+                    background: '#F8FAFC',
+                    border: '1px solid #E2E8F0',
+                    borderRadius: '8px',
+                    fontSize: '0.78rem',
+                    color: 'var(--text-secondary)',
+                    lineHeight: 1.45,
+                  }}>
+                    <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <Sparkles size={13} style={{ color: 'var(--primary)' }} />
+                      <span>Why Apollo fails & 100% Free Alternatives:</span>
+                    </div>
+                    <p style={{ margin: '0 0 4px' }}>
+                      • <strong>Apollo.io</strong> guesses corporate work inboxes (<span style={{ fontFamily: 'monospace' }}>@company.com</span>) which bounce or candidates ignore to protect their current job. Candidates prefer recruitment on their personal Gmail.
+                    </p>
+                    <p style={{ margin: '0 0 4px' }}>
+                      • <strong>Free GitHub Commits</strong>: Automatically grabs verified personal emails from public commits (100% free, unlimited).
+                    </p>
+                    <p style={{ margin: 0 }}>
+                      • <strong>Free Extensions for Personal Email</strong>: Use <strong>ContactOut</strong> (50 free personal emails/mo) or <strong>Kaspr</strong> directly on their LinkedIn profile for verified personal inboxes.
+                    </p>
                   </div>
                 </div>
               </div>
