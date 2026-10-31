@@ -330,7 +330,7 @@ def extract_years_of_experience(text: str) -> Tuple[Optional[float], str]:
 def is_experience_compatible(cand_years: Optional[float], headline_snippet: str, target_exp_str: str) -> bool:
     """
     Determines if candidate experience matches the job opening requirement.
-    Prevents senior/executive candidates (e.g. 28 years) from appearing for junior/entry-level openings.
+    Prevents senior/experienced candidates (e.g. 5 years, 28 years) from appearing for junior/fresher openings (e.g. 0 to 1 year).
     """
     if not target_exp_str:
         return True
@@ -344,32 +344,39 @@ def is_experience_compatible(cand_years: Optional[float], headline_snippet: str,
         min_exp = int(m_range.group(1))
         max_exp = int(m_range.group(2))
     elif "fresher" in text_lower or "entry" in text_lower:
-        min_exp, max_exp = 0, 2
+        min_exp, max_exp = 0, 1
     else:
         m_plus = re.search(r"(\d{1,2})\+?", text_lower)
         if m_plus:
             min_exp = int(m_plus.group(1))
             max_exp = 50
 
-    # If target is junior / early-career (e.g. 0-3 years, 1-3 years)
-    if max_exp <= 3:
-        # STRICT: Reject executives and senior leaders
-        if re.search(r"\b(director|vice president|vp|chief|cto|head of|principal architect|senior director|general manager|partner)\b", headline_snippet, re.IGNORECASE):
-            return False
-        # Strictly reject candidates with confirmed tenure >= 6.0 years (e.g. 10 years, 15 years, 28 years)
-        if cand_years is not None and cand_years >= 6.0:
-            return False
+    # If candidate's experience was detected:
+    if cand_years is not None:
+        # For junior / fresher opening (0 to 1 year):
+        if max_exp <= 1:
+            if cand_years > 2.0:
+                return False
+        # For early career (0 to 2 years):
+        elif max_exp <= 2:
+            if cand_years > 3.0:
+                return False
+        # For junior-mid (1 to 3 years):
+        elif max_exp <= 3:
+            if cand_years > 4.0:
+                return False
+        # For mid-level (3 to 5 / 3 to 6 years):
+        elif max_exp <= 6:
+            if cand_years > 8.0:
+                return False
+        # For senior openings (min_exp >= 7 or 8+ years):
+        elif min_exp >= 7:
+            if cand_years < 4.0:
+                return False
 
-    # If target is mid-level (max <= 6 years, e.g. 3-5 years)
-    elif max_exp <= 6:
-        if re.search(r"\b(director|vice president|vp|chief|cto|head of)\b", headline_snippet, re.IGNORECASE):
-            return False
-        if cand_years is not None and cand_years > 10.0:
-            return False
-
-    # If target is senior (e.g. 8+ years, 10+ years)
-    elif min_exp >= 7:
-        if cand_years is not None and cand_years < 4.0:
+    # STRICT: Reject executives and senior leaders for any junior/mid openings
+    if max_exp <= 4:
+        if re.search(r"\b(director|vice president|vp|chief|cto|head of|principal architect|senior director|general manager|partner|team lead|engineering manager)\b", headline_snippet, re.IGNORECASE):
             return False
 
     return True
@@ -378,7 +385,7 @@ def is_experience_compatible(cand_years: Optional[float], headline_snippet: str,
 def is_role_compatible(cand_text: str, target_role: str) -> bool:
     """
     Validates technical domain alignment between target role and candidate profile.
-    Strictly filters out contradictory role profiles (e.g. AI/ML or Web Dev when hiring Firmware).
+    Strictly filters out contradictory role profiles (e.g. Web Dev for AI, or AI/ML for Firmware).
     """
     if not target_role:
         return True
@@ -406,11 +413,22 @@ def is_role_compatible(cand_text: str, target_role: str) -> bool:
             return False
 
     elif target_family == "ai_ml":
-        ai_positives = ["ai", "machine learning", "ml", "nlp", "deep learning", "data scientist", "computer vision", "llm", "artificial intelligence"]
+        ai_positives = [
+            "machine learning", "deep learning", "nlp", "computer vision", "llm", "large language model",
+            "langchain", "rag", "pytorch", "tensorflow", "keras", "data scientist", "data science",
+            "generative ai", "genai", "artificial intelligence", "scikit-learn", "huggingface",
+            "transformers", "ai engineer", "ai developer", "ml engineer", "prompt engineer",
+            "natural language processing", "neural networks", "model training", "vector database"
+        ]
         has_positive = any(re.search(r"\b" + re.escape(w) + r"\b", cand_lower) for w in ai_positives)
-        has_negative = any(re.search(r"\b" + re.escape(w) + r"\b", cand_lower) for w in [
-            "firmware", "embedded systems", "civil engineer", "recruiter"
-        ])
+
+        # Contradictory domains for AI/ML (Web / Enterprise .NET, Angular, PHP, etc.)
+        contradictory = [
+            ".net", "asp.net", "angular", "c#", "wordpress", "php", "salesforce", "laravel",
+            "firmware", "embedded systems", "civil engineer", "recruiter", "talent acquisition",
+            "telecaller", "hardware engineer"
+        ]
+        has_negative = any(re.search(r"\b" + re.escape(w) + r"\b", cand_lower) for w in contradictory)
         if has_negative and not has_positive:
             return False
         if not has_positive:
@@ -876,7 +894,7 @@ def search_talent_profiles(
                     combined_text = (raw_title + " " + snippet + " " + headline).lower()
 
                     # 1. Role Domain Compatibility Check (Prevents AI/ML profiles appearing for Firmware)
-                    if effective_role and not is_role_compatible(combined_text, effective_role):
+                    if effective_role and not is_role_compatible(headline + " " + snippet, effective_role):
                         logger.debug(f"Skipping profile incompatible with role '{effective_role}': {headline}")
                         continue
 
@@ -969,7 +987,7 @@ def search_talent_profiles(
                     combined_text = (raw_title + " " + snippet + " " + headline).lower()
 
                     # Filter role compatibility in fallback
-                    if effective_role and not is_role_compatible(combined_text, effective_role):
+                    if effective_role and not is_role_compatible(headline + " " + snippet, effective_role):
                         continue
 
                     # Filter experience compatibility in fallback
