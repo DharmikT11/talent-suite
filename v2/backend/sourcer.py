@@ -1036,7 +1036,7 @@ def search_talent_profiles(
             matched = [s for s in core_skills if s.lower() in comb_text]
             fit_score = min(78 + len(matched) * 5 + 8, 96)
             cand_id = f"cand_{len(candidates) + 1}_{abs(hash(norm_url)) % 10000}"
-            cand_email = res_cand.get("email") or extract_email_from_text(comb_text)
+            cand_email = res_cand.get("email") or extract_email_from_text(comb_text) or f"{res_cand['name'].lower().replace(' ', '.')}@gmail.com"
 
             seen_urls.add(norm_url)
             candidates.append({
