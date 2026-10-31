@@ -11,7 +11,8 @@ import {
   Check, 
   Copy, 
   Link as LinkIcon,
-  UserCheck
+  UserCheck,
+  Filter
 } from 'lucide-react';
 import { 
   FaLinkedin, 
@@ -983,83 +984,146 @@ export default function TalentSourcer({ onCandidateUpdated }) {
             </div>
           </div>
 
-          {/* Urgency Filter Bar */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', marginRight: '4px' }}>
-              Filter by Availability:
-            </span>
+          {/* Professional Availability Filter Segmented Toolbar */}
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            background: '#F1F5F9',
+            padding: '4px',
+            borderRadius: '10px',
+            border: '1px solid #E2E8F0',
+            marginBottom: '20px',
+            gap: '4px',
+            flexWrap: 'wrap'
+          }}>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 10px',
+              fontSize: '0.76rem',
+              fontWeight: 700,
+              color: '#64748B',
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em'
+            }}>
+              <Filter size={13} style={{ color: '#64748B' }} />
+              <span>Availability</span>
+            </div>
+
+            <div style={{ width: '1px', height: '16px', background: '#CBD5E1', margin: '0 2px' }} />
+
+            {/* All Discovered */}
             <button
               type="button"
               onClick={() => setUrgencyFilter('all')}
               style={{
-                padding: '5px 12px',
-                borderRadius: '20px',
-                fontSize: '0.78rem',
-                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '6px 14px',
+                borderRadius: '8px',
+                fontSize: '0.8rem',
+                fontWeight: urgencyFilter === 'all' ? 700 : 600,
                 cursor: 'pointer',
-                border: '1px solid',
-                background: urgencyFilter === 'all' ? 'var(--primary)' : '#FFFFFF',
-                color: urgencyFilter === 'all' ? '#FFFFFF' : 'var(--text-secondary)',
-                borderColor: urgencyFilter === 'all' ? 'var(--primary)' : 'var(--border-subtle)',
+                border: urgencyFilter === 'all' ? '1px solid #CBD5E1' : '1px solid transparent',
+                background: urgencyFilter === 'all' ? '#FFFFFF' : 'transparent',
+                color: urgencyFilter === 'all' ? '#0F172A' : '#64748B',
+                boxShadow: urgencyFilter === 'all' ? '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)' : 'none',
                 transition: 'all 0.15s ease'
               }}
             >
-              All Discovered ({candidates.length})
+              <span>All Discovered</span>
+              <span style={{
+                background: urgencyFilter === 'all' ? 'var(--primary-light)' : '#E2E8F0',
+                color: urgencyFilter === 'all' ? 'var(--primary)' : '#475569',
+                padding: '2px 7px',
+                borderRadius: '12px',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                lineHeight: 1
+              }}>
+                {candidates.length}
+              </span>
             </button>
+
+            {/* Immediate Joiners & Notice */}
             <button
               type="button"
               onClick={() => setUrgencyFilter('immediate')}
               style={{
-                padding: '5px 12px',
-                borderRadius: '20px',
-                fontSize: '0.78rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                border: '1px solid',
-                background: urgencyFilter === 'immediate' ? '#16A34A' : '#F0FDF4',
-                color: urgencyFilter === 'immediate' ? '#FFFFFF' : '#166534',
-                borderColor: urgencyFilter === 'immediate' ? '#16A34A' : '#BBF7D0',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
+                gap: '8px',
+                padding: '6px 14px',
+                borderRadius: '8px',
+                fontSize: '0.8rem',
+                fontWeight: urgencyFilter === 'immediate' ? 700 : 600,
+                cursor: 'pointer',
+                border: urgencyFilter === 'immediate' ? '1px solid #86EFAC' : '1px solid transparent',
+                background: urgencyFilter === 'immediate' ? '#FFFFFF' : 'transparent',
+                color: urgencyFilter === 'immediate' ? '#15803D' : '#64748B',
+                boxShadow: urgencyFilter === 'immediate' ? '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)' : 'none',
                 transition: 'all 0.15s ease'
               }}
             >
-              <span>🟢 Immediate Joiners & Notice Period</span>
-              <span style={{ 
-                background: urgencyFilter === 'immediate' ? 'rgba(255,255,255,0.25)' : '#DCFCE7',
-                padding: '1px 6px',
-                borderRadius: '10px',
-                fontSize: '0.72rem'
+              <span style={{
+                width: '7px',
+                height: '7px',
+                borderRadius: '50%',
+                background: '#16A34A',
+                boxShadow: urgencyFilter === 'immediate' ? '0 0 0 2px rgba(22, 163, 74, 0.2)' : 'none'
+              }} />
+              <span>Immediate & Notice</span>
+              <span style={{
+                background: urgencyFilter === 'immediate' ? '#DCFCE7' : '#E2E8F0',
+                color: urgencyFilter === 'immediate' ? '#166534' : '#475569',
+                padding: '2px 7px',
+                borderRadius: '12px',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                lineHeight: 1
               }}>
                 {candidates.filter(c => (c.active_seeker_badge || '').includes('Immediate') || (c.active_seeker_badge || '').includes('Notice')).length}
               </span>
             </button>
+
+            {/* Actively Looking */}
             <button
               type="button"
               onClick={() => setUrgencyFilter('active')}
               style={{
-                padding: '5px 12px',
-                borderRadius: '20px',
-                fontSize: '0.78rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                border: '1px solid',
-                background: urgencyFilter === 'active' ? '#0284C7' : '#F0F9FF',
-                color: urgencyFilter === 'active' ? '#FFFFFF' : '#0369A1',
-                borderColor: urgencyFilter === 'active' ? '#0284C7' : '#BAE6FD',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
+                gap: '8px',
+                padding: '6px 14px',
+                borderRadius: '8px',
+                fontSize: '0.8rem',
+                fontWeight: urgencyFilter === 'active' ? 700 : 600,
+                cursor: 'pointer',
+                border: urgencyFilter === 'active' ? '1px solid #93C5FD' : '1px solid transparent',
+                background: urgencyFilter === 'active' ? '#FFFFFF' : 'transparent',
+                color: urgencyFilter === 'active' ? '#1D4ED8' : '#64748B',
+                boxShadow: urgencyFilter === 'active' ? '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)' : 'none',
                 transition: 'all 0.15s ease'
               }}
             >
-              <span>🔵 Actively Looking</span>
-              <span style={{ 
-                background: urgencyFilter === 'active' ? 'rgba(255,255,255,0.25)' : '#E0F2FE',
-                padding: '1px 6px',
-                borderRadius: '10px',
-                fontSize: '0.72rem'
+              <span style={{
+                width: '7px',
+                height: '7px',
+                borderRadius: '50%',
+                background: '#2563EB',
+                boxShadow: urgencyFilter === 'active' ? '0 0 0 2px rgba(37, 99, 235, 0.2)' : 'none'
+              }} />
+              <span>Actively Looking</span>
+              <span style={{
+                background: urgencyFilter === 'active' ? '#EFF6FF' : '#E2E8F0',
+                color: urgencyFilter === 'active' ? '#1D4ED8' : '#475569',
+                padding: '2px 7px',
+                borderRadius: '12px',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                lineHeight: 1
               }}>
                 {candidates.filter(c => c.is_active_seeker).length}
               </span>
@@ -1094,9 +1158,9 @@ export default function TalentSourcer({ onCandidateUpdated }) {
                   }}
                 >
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '8px' }}>
-                      <div>
-                        <h4 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px', marginBottom: '8px' }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <h4 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)', wordBreak: 'break-word' }}>
                           {cand.name}
                         </h4>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '3px', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
@@ -1177,19 +1241,28 @@ export default function TalentSourcer({ onCandidateUpdated }) {
                         </div>
                       </div>
 
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', flexShrink: 0 }}>
                         <div 
+                          className="match-badge"
                           style={{ 
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '4px',
+                            whiteSpace: 'nowrap',
+                            flexShrink: 0,
                             padding: '4px 10px', 
                             borderRadius: '20px', 
                             fontSize: '0.76rem', 
                             fontWeight: 700,
+                            lineHeight: 1.2,
                             background: cand.fit_score >= 80 ? 'var(--success-bg)' : 'var(--warning-bg)',
                             color: cand.fit_score >= 80 ? 'var(--success-text)' : 'var(--warning-text)',
                             border: `1px solid ${cand.fit_score >= 80 ? 'var(--success-border)' : 'var(--warning-border)'}`
                           }}
                         >
-                          {cand.fit_score}% Match
+                          <Sparkles size={11} style={{ flexShrink: 0 }} />
+                          <span style={{ whiteSpace: 'nowrap' }}>{cand.fit_score}% Match</span>
                         </div>
 
                         {currentStatus && (
