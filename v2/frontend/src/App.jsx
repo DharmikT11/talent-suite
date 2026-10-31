@@ -9,6 +9,7 @@ import SheetModal from './components/SheetModal';
 import ApiKeyModal from './components/ApiKeyModal';
 import ColumnSetupModal from './components/ColumnSetupModal';
 import EmailSettingsModal from './components/EmailSettingsModal';
+import OutreachModal from './components/OutreachModal';
 import AIChatDrawer from './components/AIChatDrawer';
 import TalentSourcer from './components/TalentSourcer';
 import CandidateApplyPortal from './components/CandidateApplyPortal';
@@ -31,6 +32,7 @@ export default function App() {
   const [isColumnModalOpen, setIsColumnModalOpen] = useState(false);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [outreachCandidate, setOutreachCandidate] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   const fetchStatus = async () => {
@@ -222,6 +224,7 @@ export default function App() {
                   key={candidate.id || i}
                   candidate={candidate}
                   onOpenInterviewKit={(cand) => setSelectedCandidate(cand)}
+                  onOpenOutreach={(cand) => setOutreachCandidate(cand)}
                 />
               ))}
             </div>
@@ -233,6 +236,7 @@ export default function App() {
         <CandidateTable 
           candidates={candidates}
           onOpenInterviewKit={(cand) => setSelectedCandidate(cand)}
+          onOpenOutreach={(cand) => setOutreachCandidate(cand)}
         />
       )}
 
@@ -240,6 +244,16 @@ export default function App() {
       <AIChatDrawer candidateCount={candidates.length} />
 
       {/* Modals */}
+      {outreachCandidate && (
+        <OutreachModal 
+          candidate={outreachCandidate}
+          jobTitle={getField(outreachCandidate, 'title', 'role', 'designation') || 'Engineering Position'}
+          jdSummary="Key technical position at our company."
+          onClose={() => setOutreachCandidate(null)}
+          onStatusUpdated={() => handleRefresh()}
+        />
+      )}
+
       {selectedCandidate && (
         <InterviewKitModal 
           candidate={selectedCandidate}

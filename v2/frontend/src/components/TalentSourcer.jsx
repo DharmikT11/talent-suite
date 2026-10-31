@@ -1157,6 +1157,23 @@ export default function TalentSourcer({ onCandidateUpdated }) {
                               <span>{cand.active_seeker_badge || 'Active Job Seeker'}</span>
                             </span>
                           )}
+
+                          {cand.email && (
+                            <span style={{ 
+                              display: 'inline-flex', 
+                              alignItems: 'center', 
+                              gap: '4px', 
+                              padding: '1px 8px', 
+                              borderRadius: '4px', 
+                              fontSize: '0.72rem', 
+                              fontWeight: 700, 
+                              background: '#EFF6FF', 
+                              color: '#1D4ED8', 
+                              border: '1px solid #BFDBFE' 
+                            }}>
+                              <span>✉️ {cand.email}</span>
+                            </span>
+                          )}
                         </div>
                       </div>
 

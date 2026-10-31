@@ -175,6 +175,19 @@ def extract_location_from_text(text: str, default_loc: str = "") -> str:
     return default_loc or "Location not specified"
 
 
+def extract_email_from_text(text: str) -> str:
+    """Extracts valid personal/business email addresses from text snippets."""
+    if not text:
+        return ""
+    matches = re.findall(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,7}\b", text)
+    for email in matches:
+        e = email.lower().strip(".")
+        # Exclude bot/system/search domains
+        if not any(bad in e for bad in ("linkedin.com", "duckduckgo.com", "google.com", "github.com", "sentry.io", "w3.org", "example.com")):
+            return e
+    return ""
+
+
 CURRENT_YEAR = 2026
 
 
@@ -786,6 +799,7 @@ def search_talent_profiles(
                         continue
 
                     cand_loc = extract_location_from_text(snippet + " " + headline, location_filter)
+                    cand_email = extract_email_from_text(raw_title + " " + snippet + " " + headline)
                     matched = [s for s in core_skills if s.lower() in combined_text]
                     
                     # Check for active job seeker signals
@@ -808,6 +822,7 @@ def search_talent_profiles(
                     candidates.append({
                         "id": cand_id,
                         "name": name,
+                        "email": cand_email,
                         "headline": headline,
                         "profile_url": url,
                         "snippet": snippet,
@@ -873,6 +888,7 @@ def search_talent_profiles(
                         continue
 
                     cand_loc = extract_location_from_text(snippet + " " + headline, location_filter)
+                    cand_email = extract_email_from_text(raw_title + " " + snippet + " " + headline)
                     matched = [s for s in core_skills if s.lower() in combined_text]
                     is_active_seeker = any(k in combined_text for k in ACTIVE_SEEKER_KEYWORDS)
                     active_seeker_badge = "Open to Work / Actively Looking" if is_active_seeker else ""
@@ -883,6 +899,7 @@ def search_talent_profiles(
                     candidates.append({
                         "id": cand_id,
                         "name": name,
+                        "email": cand_email,
                         "headline": headline,
                         "profile_url": url,
                         "snippet": snippet,
@@ -927,11 +944,13 @@ def search_talent_profiles(
             matched = [s for s in core_skills if s.lower() in comb_text]
             fit_score = min(78 + len(matched) * 5 + 8, 96)
             cand_id = f"cand_{len(candidates) + 1}_{abs(hash(norm_url)) % 10000}"
+            cand_email = res_cand.get("email") or extract_email_from_text(comb_text)
 
             seen_urls.add(norm_url)
             candidates.append({
                 "id": cand_id,
                 "name": res_cand["name"],
+                "email": cand_email,
                 "headline": res_cand["headline"],
                 "profile_url": res_cand["profile_url"],
                 "snippet": res_cand["snippet"],

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { ExternalLink, Sparkles, MapPin, Briefcase, Mail, Phone, Check, Copy, Clock, RefreshCw, FileText, Building2 } from 'lucide-react';
+import { FaLinkedin, FaGithub, FaPaperPlane } from 'react-icons/fa';
 
-export default function CandidateCard({ candidate, onOpenInterviewKit }) {
+export default function CandidateCard({ candidate, onOpenInterviewKit, onOpenOutreach }) {
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedPhone, setCopiedPhone] = useState(false);
 
@@ -22,7 +23,9 @@ export default function CandidateCard({ candidate, onOpenInterviewKit }) {
   const location = getField('location', 'city');
   const company = getField('company', 'employer');
   const skillsStr = getField('skill');
-  const cvLink = getField('cv link', 'resume link', 'link', 'drive');
+  const rawCvLink = getField('cv link', 'resume link', 'link', 'drive');
+  const linkedInUrl = candidate['LinkedIn URL'] || candidate['Profile URL'] || candidate['profile_url'] || (rawCvLink && (rawCvLink.includes('linkedin.com') || rawCvLink.includes('github.com') || rawCvLink.includes('naukri.com') || rawCvLink.includes('indeed.com')) ? rawCvLink : '');
+  const realCvLink = (rawCvLink && !rawCvLink.includes('linkedin.com') && !rawCvLink.includes('github.com') && !rawCvLink.includes('naukri.com') && !rawCvLink.includes('indeed.com')) ? rawCvLink : '';
   const fitScoreStr = getField('fit', 'score');
   const status = getField('status');
   const dateAdded = getField('date', 'added', 'time');
@@ -172,24 +175,78 @@ export default function CandidateCard({ candidate, onOpenInterviewKit }) {
         </div>
       </div>
 
-      <div className="candidate-actions">
-        {cvLink ? (
+      <div className="candidate-actions" style={{ flexWrap: 'wrap', gap: '8px' }}>
+        {/* If real uploaded resume PDF exists */}
+        {realCvLink && (
           <a 
-            href={cvLink} 
+            href={realCvLink} 
             target="_blank" 
             rel="noopener noreferrer" 
             className="btn btn-primary"
-            style={{ flex: 1, padding: '8px 12px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            style={{ flex: 1, minWidth: '120px', padding: '8px 12px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
           >
             <FileText size={14} />
             <span>View Resume</span>
-            <ExternalLink size={13} />
+            <ExternalLink size={12} />
           </a>
-        ) : (
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Resume not uploaded</span>
         )}
 
+        {/* If LinkedIn / Web Profile exists */}
+        {linkedInUrl && (
+          <a 
+            href={linkedInUrl} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="btn btn-secondary"
+            style={{ 
+              flex: 1, 
+              minWidth: '120px',
+              padding: '8px 12px', 
+              fontSize: '0.8rem', 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              gap: '6px',
+              color: '#0A66C2',
+              background: '#EFF6FF',
+              borderColor: '#BFDBFE',
+              fontWeight: 600
+            }}
+          >
+            {linkedInUrl.includes('github.com') ? (
+              <FaGithub size={14} style={{ color: '#24292e' }} />
+            ) : (
+              <FaLinkedin size={14} style={{ color: '#0A66C2' }} />
+            )}
+            <span>{linkedInUrl.includes('github.com') ? 'GitHub' : 'LinkedIn'}</span>
+            <ExternalLink size={12} />
+          </a>
+        )}
+
+        {/* If NEITHER resume NOR profile exists */}
+        {!realCvLink && !linkedInUrl && (
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', padding: '6px 0' }}>
+            Resume not uploaded
+          </span>
+        )}
+
+        {/* Reach Out Pitch Generator Button */}
+        {onOpenOutreach && (
+          <button
+            type="button"
+            className="btn btn-secondary"
+            style={{ padding: '8px 12px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#1D4ED8' }}
+            onClick={() => onOpenOutreach(candidate)}
+            title="Generate AI Outreach Pitch (LinkedIn, Email, WhatsApp)"
+          >
+            <FaPaperPlane size={11} style={{ color: '#2563EB' }} />
+            <span>Reach Out</span>
+          </button>
+        )}
+
+        {/* AI Interview Kit Button */}
         <button 
+          type="button"
           className="btn btn-outline"
           style={{ padding: '8px 12px', fontSize: '0.8rem' }}
           onClick={() => onOpenInterviewKit(candidate)}

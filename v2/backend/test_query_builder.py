@@ -111,7 +111,7 @@ class TestWordCapAndTrimming(unittest.TestCase):
             location="India",
             max_words=30,
         )
-        self.assertEqual(len(queries), 5)
+        self.assertGreaterEqual(len(queries), 5)
         for item in queries:
             words = count_words(item["query"])
             self.assertLessEqual(words, 30, f"Query '{item['channel']}' exceeded 30 words: {words} words: {item['query']}")

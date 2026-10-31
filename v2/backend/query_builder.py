@@ -652,6 +652,28 @@ def generate_sourcing_queries(
         "google_url": f"https://www.google.com/search?q={urllib.parse.quote_plus(q5)}&tbs=qdr:y",
     })
 
+    # Channel 6: Direct Public Emails
+    # site:linkedin.com/in/ + titles + ("@gmail.com" OR "@outlook.com" OR "@yahoo.com") + location
+    q6 = build_and_trim_query(
+        site_prefix="site:linkedin.com/in/",
+        titles=all_synonyms[:2],
+        signals='("@gmail.com" OR "@outlook.com" OR "@yahoo.com")',
+        skills=specific_skills[:2],
+        location_str=loc_expanded,
+        exclusions=STANDARD_EXCLUSIONS,
+        experience_group=exp_group,
+        max_words=max_words,
+        intitle_titles=False,
+    )
+    results.append({
+        "platform": "LinkedIn",
+        "channel": "LinkedIn - Public Email Discovery",
+        "signal": "Profiles with Public Email",
+        "query": q6,
+        "word_count": count_words(q6),
+        "google_url": f"https://www.google.com/search?q={urllib.parse.quote_plus(q6)}&tbs=qdr:y",
+    })
+
     return results
 
 

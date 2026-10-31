@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { ExternalLink, Sparkles, Search, ArrowUpDown, FileText } from 'lucide-react';
+import { FaLinkedin, FaGithub, FaPaperPlane } from 'react-icons/fa';
 
-export default function CandidateTable({ candidates = [], onOpenInterviewKit }) {
+export default function CandidateTable({ candidates = [], onOpenInterviewKit, onOpenOutreach }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('name');
   const [sortAsc, setSortAsc] = useState(true);
@@ -68,7 +69,9 @@ export default function CandidateTable({ candidates = [], onOpenInterviewKit }) 
                 const exp = getField(c, 'exp', 'year') || '—';
                 const skills = getField(c, 'skill');
                 const loc = getField(c, 'location', 'city') || '—';
-                const cvLink = getField(c, 'cv link', 'resume link', 'link', 'drive');
+                const rawCvLink = getField(c, 'cv link', 'resume link', 'link', 'drive');
+                const linkedInUrl = c['LinkedIn URL'] || c['Profile URL'] || c['profile_url'] || (rawCvLink && (rawCvLink.includes('linkedin.com') || rawCvLink.includes('github.com') || rawCvLink.includes('naukri.com') || rawCvLink.includes('indeed.com')) ? rawCvLink : '');
+                const realCvLink = (rawCvLink && !rawCvLink.includes('linkedin.com') && !rawCvLink.includes('github.com') && !rawCvLink.includes('naukri.com') && !rawCvLink.includes('indeed.com')) ? rawCvLink : '';
                 const fitScoreStr = getField(c, 'fit', 'score');
 
                 let fitScore = null;
@@ -90,6 +93,18 @@ export default function CandidateTable({ candidates = [], onOpenInterviewKit }) 
                     <td style={{ padding: '14px', fontWeight: '600', color: 'var(--text-primary)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                         <span>{name}</span>
+                        {linkedInUrl && (
+                          <a 
+                            href={linkedInUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            title="Open Profile in new tab"
+                            style={{ display: 'inline-flex', alignItems: 'center', color: '#0A66C2', background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '4px', padding: '1px 5px', fontSize: '0.68rem', gap: '3px', textDecoration: 'none' }}
+                          >
+                            {linkedInUrl.includes('github.com') ? <FaGithub size={10} style={{ color: '#24292e' }} /> : <FaLinkedin size={10} style={{ color: '#0A66C2' }} />}
+                            <span>Profile</span>
+                          </a>
+                        )}
                         {getField(c, 'status') && (
                           <span 
                             style={{ 
@@ -148,26 +163,61 @@ export default function CandidateTable({ candidates = [], onOpenInterviewKit }) 
                       )}
                     </td>
                     <td style={{ padding: '14px', textAlign: 'right' }}>
-                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                        {cvLink ? (
+                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap' }}>
+                        {/* Sourced Profile Button */}
+                        {linkedInUrl && (
                           <a 
-                            href={cvLink} 
+                            href={linkedInUrl} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="btn btn-secondary" 
-                            style={{ padding: '6px 10px', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                            style={{ padding: '5px 8px', fontSize: '0.74rem', display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#0A66C2', background: '#EFF6FF', borderColor: '#BFDBFE' }}
+                            title="Open Profile in new tab"
                           >
-                            <FileText size={12} />
-                            <span>Resume</span>
-                            <ExternalLink size={12} />
+                            {linkedInUrl.includes('github.com') ? <FaGithub size={11} style={{ color: '#24292e' }} /> : <FaLinkedin size={11} style={{ color: '#0A66C2' }} />}
+                            <span>Profile</span>
+                            <ExternalLink size={10} />
                           </a>
-                        ) : null}
+                        )}
+
+                        {/* Real Uploaded Resume */}
+                        {realCvLink && (
+                          <a 
+                            href={realCvLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="btn btn-secondary" 
+                            style={{ padding: '5px 8px', fontSize: '0.74rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                            title="View Uploaded Resume PDF"
+                          >
+                            <FileText size={11} />
+                            <span>Resume</span>
+                            <ExternalLink size={10} />
+                          </a>
+                        )}
+
+                        {/* Reach Out Button */}
+                        {onOpenOutreach && (
+                          <button 
+                            type="button"
+                            className="btn btn-secondary"
+                            style={{ padding: '5px 8px', fontSize: '0.74rem', display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#1D4ED8' }}
+                            onClick={() => onOpenOutreach(c)}
+                            title="Generate AI Outreach Pitch"
+                          >
+                            <FaPaperPlane size={9} style={{ color: '#2563EB' }} />
+                            <span>Reach Out</span>
+                          </button>
+                        )}
+
+                        {/* Questions (Interview Kit) Button */}
                         <button 
+                          type="button"
                           className="btn btn-outline" 
-                          style={{ padding: '6px 10px', fontSize: '0.75rem' }}
+                          style={{ padding: '5px 8px', fontSize: '0.74rem' }}
                           onClick={() => onOpenInterviewKit(c)}
                         >
-                          <Sparkles size={12} />
+                          <Sparkles size={11} />
                           <span>Questions</span>
                         </button>
                       </div>

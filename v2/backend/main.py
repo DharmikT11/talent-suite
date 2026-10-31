@@ -502,16 +502,32 @@ def get_candidates():
                 elif c_meta.get("status") and c_meta.get("status") in ("Outreach Sent", "CV Received & Screened"):
                     item["Status"] = c_meta["status"]
 
-            # Check if CV Link is missing or empty and enrich if available
-            has_cv = any("link" in k.lower() or "cv url" in k.lower() for k, v in item.items() if v and str(v).strip())
+            # Enrich LinkedIn / Profile URL if available from c_meta or row
+            p_url = item.get("LinkedIn URL") or item.get("Profile URL") or item.get("profile_url") or (c_meta.get("profile_url") if c_meta else "")
+            if p_url:
+                item["LinkedIn URL"] = p_url
+                item["Profile URL"] = p_url
+                item["profile_url"] = p_url
+
+            # Check if CV Link is an external profile URL (e.g. linkedin.com) rather than an actual resume file
+            raw_cv = item.get("CV Link") or ""
+            if any(social in raw_cv.lower() for social in ("linkedin.com", "github.com", "naukri.com", "indeed.com")):
+                if not item.get("LinkedIn URL"):
+                    item["LinkedIn URL"] = raw_cv
+                    item["Profile URL"] = raw_cv
+                    item["profile_url"] = raw_cv
+                item["CV Link"] = ""  # Clean this out: A LinkedIn profile is NOT a resume PDF!
+
+            # Check if CV Link is missing or empty and enrich if a real resume file is available
+            has_cv = bool(item.get("CV Link", "").strip())
             if not has_cv:
                 source_file = item.get("Source File") or item.get("source_file") or ""
                 if source_file and (UPLOAD_DIR / source_file).exists():
                     item["CV Link"] = f"/api/resumes/{source_file}"
                 elif c_meta and isinstance(c_meta, dict) and c_meta.get("cv_link"):
-                    item["CV Link"] = c_meta["cv_link"]
-                elif c_meta and isinstance(c_meta, dict) and c_meta.get("profile_url"):
-                    item["CV Link"] = c_meta["profile_url"]
+                    meta_cv = c_meta["cv_link"]
+                    if not any(social in meta_cv.lower() for social in ("linkedin.com", "github.com", "naukri.com", "indeed.com")):
+                        item["CV Link"] = meta_cv
                 else:
                     for f in UPLOAD_DIR.glob("*.pdf"):
                         name_part = item.get("Applicant Name", "").split()[0].lower() if item.get("Applicant Name") else ""
@@ -520,6 +536,35 @@ def get_candidates():
                             break
 
             candidates.append(item)
+
+        # Also read from 'Sourced Leads' tab in Google Sheets if available
+        try:
+            sourced_data = connector.read(sheet="Sourced Leads")
+            sourced_headers = sourced_data.get("headers", [])
+            sourced_rows = sourced_data.get("rows", [])
+            if sourced_rows and sourced_headers:
+                existing_names = {c.get("Applicant Name", "").strip().lower() for c in candidates if c.get("Applicant Name")}
+                for s_idx, s_row in enumerate(sourced_rows):
+                    s_item = {"id": len(candidates) + 1, "row_number": s_idx + 2}
+                    for sc_idx, sc_name in enumerate(sourced_headers):
+                        s_item[sc_name] = s_row[sc_idx] if sc_idx < len(s_row) else ""
+                    s_name = s_item.get("Candidate Name") or s_item.get("Applicant Name") or s_item.get("Name") or ""
+                    if s_name and s_name.lower() not in existing_names:
+                        s_item["Applicant Name"] = s_name
+                        s_item["Current Title"] = s_item.get("Role / Title") or s_item.get("Current Title") or ""
+                        s_item["Skills"] = s_item.get("Matched Skills") or s_item.get("Skills") or ""
+                        p_url = s_item.get("Profile URL") or s_item.get("LinkedIn URL") or ""
+                        s_item["LinkedIn URL"] = p_url
+                        s_item["Profile URL"] = p_url
+                        s_item["profile_url"] = p_url
+                        s_item["CV Link"] = ""  # Sourced leads do not have an uploaded resume file yet
+                        s_item["Status"] = s_item.get("Outreach Status") or s_item.get("Status") or "Sourced"
+                        s_item["Date Added"] = s_item.get("Date Sourced") or s_item.get("Date Added") or ""
+                        s_item["Source File"] = s_item.get("Platform") or "LinkedIn (X-Ray)"
+                        candidates.append(s_item)
+                        existing_names.add(s_name.lower())
+        except Exception as exc:
+            logger.debug(f"Sourced Leads sheet check: {exc}")
 
         # Merge prospects in candidates_meta not yet in raw_rows (e.g. newly sourced profiles)
         seen_names = {c.get("Applicant Name", "").strip().lower() for c in candidates if c.get("Applicant Name")}
@@ -530,6 +575,7 @@ def get_candidates():
             cand_name = m_val.get("name") or (m_key.replace("name:", "").title() if m_key.startswith("name:") else "")
             cand_email = m_val.get("email", "").strip().lower()
             if cand_name and cand_name.lower() not in seen_names and (not cand_email or cand_email not in seen_emails_set):
+                p_url = m_val.get("profile_url", "")
                 prospect_item = {
                     "id": len(candidates) + 1,
                     "row_number": len(candidates) + 2,
@@ -543,7 +589,10 @@ def get_candidates():
                     "Date Added": m_val.get("added_at") or m_val.get("updated_at") or datetime.now().strftime("%Y-%m-%d"),
                     "Source File": m_val.get("source", "LinkedIn (X-Ray)"),
                     "Status": m_val.get("status", "Sourced"),
-                    "CV Link": m_val.get("profile_url") or m_val.get("cv_link", ""),
+                    "LinkedIn URL": p_url,
+                    "Profile URL": p_url,
+                    "profile_url": p_url,
+                    "CV Link": m_val.get("cv_link", ""),  # Only set if they uploaded an actual resume
                     "Fit Score": f"{m_val['fit_score']}%" if m_val.get("fit_score") is not None else "",
                 }
                 candidates.append(prospect_item)
@@ -1048,8 +1097,8 @@ def save_sourcing_candidate(req: SourcingSaveCandidateRequest):
         "profile_url": profile_url,
         "matched_skills": skills,
         "role_title": role_title,
-        "cv_link": profile_url,
-        "source": "LinkedIn Sourcing (X-Ray)",
+        "cv_link": "",  # Sourced candidates do not have an uploaded resume file yet!
+        "source": cand.get("source") or "LinkedIn Sourcing (X-Ray)",
         "added_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
     }
@@ -1070,7 +1119,7 @@ def save_sourcing_candidate(req: SourcingSaveCandidateRequest):
             if not headers:
                 DEFAULT_SOURCED_HEADERS = [
                     "Candidate Name", "Role / Title", "Location", "Matched Skills",
-                    "Platform", "Profile URL", "Fit Score", "Outreach Status", "Last Contacted", "Date Sourced"
+                    "Platform", "Profile URL", "LinkedIn URL", "Email", "Fit Score", "Outreach Status", "Last Contacted", "Date Sourced"
                 ]
                 headers = DEFAULT_SOURCED_HEADERS
 
@@ -1095,14 +1144,14 @@ def save_sourcing_candidate(req: SourcingSaveCandidateRequest):
                     full_row[h] = skills_str
                 elif "location" in hl or "city" in hl:
                     full_row[h] = loc
-                elif "linkedin" in hl or "profile" in hl or "url" in hl:
+                elif "linkedin" in hl or "profile" in hl or ("url" in hl and "cv" not in hl):
                     full_row[h] = profile_url
                 elif "fit" in hl or "score" in hl:
                     full_row[h] = f"{cand.get('fit_score')}%" if cand.get("fit_score") else ""
                 elif "contact" in hl:
                     full_row[h] = datetime.now().strftime("%Y-%m-%d %H:%M") if status == "Outreach Sent" else ""
-                elif "cv" in hl or "link" in hl:
-                    full_row[h] = profile_url
+                elif "cv" in hl:
+                    full_row[h] = ""  # No uploaded CV for sourced leads
                 else:
                     full_row[h] = ""
 
