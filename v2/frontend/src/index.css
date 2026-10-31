@@ -509,6 +509,7 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  gap: 12px;
   margin-bottom: 12px;
 }
 
@@ -516,6 +517,7 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 1.15rem;
   font-weight: 700;
   color: #0F172A;
+  word-break: break-word;
 }
 
 .candidate-role {
@@ -526,13 +528,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .match-badge {
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 .match-badge.high {
@@ -1267,8 +1271,10 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   .candidate-top {
-    flex-direction: column;
+    display: flex;
+    flex-direction: row;
     align-items: flex-start;
+    justify-content: space-between;
     gap: 8px;
   }
 

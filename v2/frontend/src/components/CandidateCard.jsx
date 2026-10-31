@@ -55,10 +55,10 @@ export default function CandidateCard({ candidate, onOpenInterviewKit, onOpenOut
   return (
     <div className="candidate-card">
       <div>
-        <div className="candidate-top">
-          <div>
+        <div className="candidate-top" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <h3 className="candidate-name" style={{ margin: 0 }}>{name}</h3>
+              <h3 className="candidate-name" style={{ margin: 0, wordBreak: 'break-word' }}>{name}</h3>
               {status && (
                 <span 
                   style={{ 
@@ -107,9 +107,12 @@ export default function CandidateCard({ candidate, onOpenInterviewKit, onOpenOut
             <div className="candidate-role">{title}</div>
           </div>
           {fitScore !== null && (
-            <div className={`match-badge ${fitScore >= 80 ? 'high' : fitScore >= 60 ? 'medium' : 'low'}`}>
-              <Sparkles size={12} />
-              <span>{fitScore}% Match</span>
+            <div 
+              className={`match-badge ${fitScore >= 80 ? 'high' : fitScore >= 60 ? 'medium' : 'low'}`}
+              style={{ whiteSpace: 'nowrap', flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+            >
+              <Sparkles size={12} style={{ flexShrink: 0 }} />
+              <span style={{ whiteSpace: 'nowrap' }}>{fitScore}% Match</span>
             </div>
           )}
         </div>
