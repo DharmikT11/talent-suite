@@ -94,7 +94,7 @@ export default function OutreachModal({ candidate, roleTitle, jdSummary, onClose
         setGoogleDorkUrl(gUrl);
         setFindEmailMsg({
           type: 'info',
-          text: 'No public commit email was found. You can check Google or use free ContactOut/Kaspr extension on LinkedIn.'
+          text: 'No public contact email detected automatically for this profile.'
         });
       }
     } catch (err) {
@@ -493,7 +493,7 @@ export default function OutreachModal({ candidate, roleTitle, jdSummary, onClose
                       title="Extract developer email from public git commits or portfolio"
                     >
                       {findingEmail ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} style={{ color: 'var(--primary)' }} />}
-                      <span>{findingEmail ? 'Searching...' : '⚡ Find Email Free'}</span>
+                      <span>{findingEmail ? 'Searching...' : '⚡ Auto-Find Email'}</span>
                     </button>
                   </div>
 
@@ -570,32 +570,6 @@ export default function OutreachModal({ candidate, roleTitle, jdSummary, onClose
                           : 'Send via Brevo API'}
                       </span>
                     </button>
-                  </div>
-
-                  {/* Free Email Finding Strategies Tip Box */}
-                  <div style={{
-                    marginTop: '10px',
-                    padding: '10px 12px',
-                    background: '#F8FAFC',
-                    border: '1px solid #E2E8F0',
-                    borderRadius: '8px',
-                    fontSize: '0.78rem',
-                    color: 'var(--text-secondary)',
-                    lineHeight: 1.45,
-                  }}>
-                    <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <Sparkles size={13} style={{ color: 'var(--primary)' }} />
-                      <span>Why Apollo fails & 100% Free Alternatives:</span>
-                    </div>
-                    <p style={{ margin: '0 0 4px' }}>
-                      • <strong>Apollo.io</strong> guesses corporate work inboxes (<span style={{ fontFamily: 'monospace' }}>@company.com</span>) which bounce or candidates ignore to protect their current job. Candidates prefer recruitment on their personal Gmail.
-                    </p>
-                    <p style={{ margin: '0 0 4px' }}>
-                      • <strong>Free GitHub Commits</strong>: Automatically grabs verified personal emails from public commits (100% free, unlimited).
-                    </p>
-                    <p style={{ margin: 0 }}>
-                      • <strong>Free Extensions for Personal Email</strong>: Use <strong>ContactOut</strong> (50 free personal emails/mo) or <strong>Kaspr</strong> directly on their LinkedIn profile for verified personal inboxes.
-                    </p>
                   </div>
                 </div>
               </div>
