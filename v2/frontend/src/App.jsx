@@ -9,6 +9,7 @@ import SheetModal from './components/SheetModal';
 import ApiKeyModal from './components/ApiKeyModal';
 import ColumnSetupModal from './components/ColumnSetupModal';
 import EmailSettingsModal from './components/EmailSettingsModal';
+import SecretAdminModal from './components/SecretAdminModal';
 import OutreachModal from './components/OutreachModal';
 import AIChatDrawer from './components/AIChatDrawer';
 import TalentSourcer from './components/TalentSourcer';
@@ -31,6 +32,7 @@ export default function App() {
   const [isKeyModalOpen, setIsKeyModalOpen] = useState(false);
   const [isColumnModalOpen, setIsColumnModalOpen] = useState(false);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [isSecretAdminOpen, setIsSecretAdminOpen] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [outreachCandidate, setOutreachCandidate] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,9 +42,6 @@ export default function App() {
       const res = await fetch('/api/status');
       const data = await res.json();
       setStatus(data);
-      if (!data.has_ai_key) {
-        setIsKeyModalOpen(true);
-      }
     } catch (err) {
       console.error('Failed to fetch status:', err);
     }
@@ -79,6 +78,16 @@ export default function App() {
     fetchStatus();
     fetchEmailConfig();
     fetchCandidates();
+
+    // Secret Admin Console Shortcut: Ctrl + Shift + K or Ctrl + Shift + S
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'K' || e.key === 'k' || e.key === 'S' || e.key === 's')) {
+        e.preventDefault();
+        setIsSecretAdminOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const handleRefresh = async () => {
@@ -116,11 +125,7 @@ export default function App() {
       {/* Top Navigation */}
       <Header 
         status={status} 
-        emailConfig={emailConfig}
-        onOpenSheetModal={() => setIsSheetModalOpen(true)}
-        onOpenKeyModal={() => setIsKeyModalOpen(true)}
-        onOpenColumnModal={() => setIsColumnModalOpen(true)}
-        onOpenEmailModal={() => setIsEmailModalOpen(true)}
+        onOpenSecretAdmin={() => setIsSecretAdminOpen(true)}
         onRefresh={handleRefresh}
         loading={loading}
       />
@@ -261,39 +266,20 @@ export default function App() {
         />
       )}
 
-      {isSheetModalOpen && (
-        <SheetModal 
+      {/* Secret Enterprise Admin Console (Shortcut: Ctrl + Shift + K) */}
+      {isSecretAdminOpen && (
+        <SecretAdminModal
+          isOpen={isSecretAdminOpen}
+          onClose={() => setIsSecretAdminOpen(false)}
           status={status}
-          onClose={() => setIsSheetModalOpen(false)}
-          onConnected={() => handleRefresh()}
-        />
-      )}
-
-      {isKeyModalOpen && (
-        <ApiKeyModal 
-          currentProvider={status?.provider || 'gemini'}
-          maskedKey={status?.masked_key || ''}
-          onClose={() => setIsKeyModalOpen(false)}
+          emailConfig={emailConfig}
           onKeySaved={() => handleRefresh()}
-        />
-      )}
-
-      {isColumnModalOpen && (
-        <ColumnSetupModal 
-          isOpen={isColumnModalOpen}
-          onClose={() => setIsColumnModalOpen(false)}
-          onColumnsUpdated={() => handleRefresh()}
-        />
-      )}
-
-      {isEmailModalOpen && (
-        <EmailSettingsModal
-          isOpen={isEmailModalOpen}
-          onClose={() => setIsEmailModalOpen(false)}
-          onSaved={(newCfg) => {
+          onSheetConnected={() => handleRefresh()}
+          onEmailSaved={(newCfg) => {
             setEmailConfig(newCfg);
             fetchStatus();
           }}
+          onColumnsUpdated={() => handleRefresh()}
         />
       )}
     </div>

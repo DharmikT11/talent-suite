@@ -1,34 +1,33 @@
-import React from 'react';
-import { Sparkles, Database, RefreshCw, Key, Cpu, Columns, Mail } from 'lucide-react';
+import React, { useState } from 'react';
+import { Sparkles, RefreshCw, Lock } from 'lucide-react';
 
 export default function Header({ 
   status, 
-  emailConfig,
-  onOpenSheetModal, 
-  onOpenKeyModal, 
-  onOpenColumnModal, 
-  onOpenEmailModal,
+  onOpenSecretAdmin,
   onRefresh, 
   loading 
 }) {
-  const isSheetConnected = status?.sheet_connected;
-  const hasAiKey = status?.has_ai_key;
-  const provider = status?.provider || 'none';
+  const [clickCount, setClickCount] = useState(0);
 
-  const providerLabel = provider === 'gemini' 
-    ? 'Gemini 2.5' 
-    : provider === 'anthropic' 
-    ? 'Claude 3.5' 
-    : provider === 'openai' 
-    ? 'GPT-4o Mini' 
-    : 'No AI Key';
-
-  const isEmailConfigured = emailConfig?.is_configured;
-  const emailProviderLabel = emailConfig?.provider === 'brevo' ? 'Brevo Mail' : 'SMTP Mail';
+  const handleBrandClick = () => {
+    const next = clickCount + 1;
+    if (next >= 3) {
+      setClickCount(0);
+      onOpenSecretAdmin?.();
+    } else {
+      setClickCount(next);
+      setTimeout(() => setClickCount(0), 1200);
+    }
+  };
 
   return (
     <header className="navbar">
-      <div className="brand-section">
+      <div 
+        className="brand-section" 
+        onClick={handleBrandClick}
+        style={{ cursor: 'pointer', userSelect: 'none' }}
+        title="RecruitAI Suite (Triple-click or press Ctrl+Shift+K for Admin Console)"
+      >
         <div className="brand-logo">
           <Sparkles size={22} />
         </div>
@@ -44,80 +43,58 @@ export default function Header({
       </div>
 
       <div className="nav-controls">
-        {/* AI Key & Provider Button */}
-        <button 
-          className="sheet-status-pill"
+        {/* Enterprise System Online Badge */}
+        <div 
           style={{ 
-            background: hasAiKey ? '#EFF6FF' : '#FEF3C7', 
-            borderColor: hasAiKey ? '#BFDBFE' : '#FDE68A',
-            color: hasAiKey ? '#1D4ED8' : '#B45309'
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            gap: '6px', 
+            padding: '6px 12px', 
+            background: '#F0FDF4', 
+            border: '1px solid #BBF7D0', 
+            borderRadius: '20px', 
+            fontSize: '0.78rem', 
+            fontWeight: 700, 
+            color: '#166534' 
           }}
-          onClick={onOpenKeyModal}
-          title="Click to configure AI Engine & API Key"
         >
-          {hasAiKey ? <Cpu size={14} /> : <Key size={14} />}
-          <span>
-            <strong>{hasAiKey ? `${providerLabel} Active` : 'Configure AI Key'}</strong>
-          </span>
-        </button>
-
-        {/* Email Setup Button (Brevo / SMTP) */}
-        <button
-          className="sheet-status-pill"
-          style={{
-            background: isEmailConfigured ? '#EFF6FF' : '#F8FAFC',
-            borderColor: isEmailConfigured ? '#BFDBFE' : '#E2E8F0',
-            color: isEmailConfigured ? '#1D4ED8' : '#64748B',
-          }}
-          onClick={onOpenEmailModal}
-          title="Click to configure Brevo API or Custom SMTP email dispatch"
-        >
-          <Mail size={14} style={{ color: isEmailConfigured ? '#2563EB' : '#64748B' }} />
-          <span>
-            <strong>
-              {isEmailConfigured ? `${emailProviderLabel} Active` : '✉️ Email Setup'}
-            </strong>
-          </span>
-        </button>
-
-        {/* Google Sheet Connection Pill */}
-        <button 
-          className="sheet-status-pill" 
-          onClick={onOpenSheetModal}
-          title="Click to configure Google Sheet connection"
-        >
-          <span className={`pulse-dot ${isSheetConnected ? '' : 'offline'}`} />
-          <span>
-            {isSheetConnected ? (
-              <strong>{status.spreadsheet || 'Google Sheet'} › {status.sheet || 'Tab'}</strong>
-            ) : (
-              'Connect Google Sheet'
-            )}
-          </span>
-          <Database size={14} style={{ opacity: 0.7 }} />
-        </button>
-
-        {/* Sheet Column Setup Button */}
-        <button
-          className="btn btn-secondary"
-          style={{ padding: '8px 12px', fontSize: '0.8rem' }}
-          onClick={onOpenColumnModal}
-          title="Set up or customize Google Sheet column headers"
-        >
-          <Columns size={14} style={{ color: '#2563EB' }} />
-          <span>Sheet Columns</span>
-        </button>
+          <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#16A34A', boxShadow: '0 0 0 2px rgba(22, 163, 74, 0.2)' }} />
+          <span>Enterprise System Active</span>
+        </div>
 
         {/* Refresh Button */}
         <button 
           className="btn btn-secondary" 
-          style={{ padding: '8px 12px', fontSize: '0.8rem' }}
+          style={{ padding: '8px 14px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           onClick={onRefresh}
           disabled={loading}
-          title="Refresh latest candidates from Google Sheet"
+          title="Refresh latest candidate pipeline data"
         >
           <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
           <span>Refresh</span>
+        </button>
+
+        {/* Discreet Secret Admin Trigger */}
+        <button
+          type="button"
+          onClick={onOpenSecretAdmin}
+          title="Admin Console (Shortcut: Ctrl + Shift + K)"
+          style={{
+            background: 'transparent',
+            border: 'none',
+            padding: '6px 8px',
+            cursor: 'pointer',
+            opacity: 0.25,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'opacity 0.2s ease',
+            color: 'var(--text-muted)'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '0.25'}
+        >
+          <Lock size={14} />
         </button>
       </div>
     </header>
